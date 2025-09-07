@@ -1,20 +1,35 @@
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 
-export default function RedirecionamentoLinks(){
-    return(
-        <div style={{ marginTop: "10px", textAlign: "center"}}>
-            <p>
-                Não possui conta?{" "}
-                <Link to="/cadastro" style={{color: "#FF6600", fontWeight: "bold"}}>
-                    Clique aqui
-                </Link>
-            </p>
-            <p>
-                Esqueceu sua senha?{" "}
-                <Link to="/esqueci-senha" style={{color: "#FF6600", fontWeight: "bold"}}>
-                    Clique aqui 
-                </Link>
-            </p>
-        </div>
-    )
+export default function RedirecionamentoLinks({ links = [], align = "center", gap = 8 }) {
+  if (!links.length) return null;
+
+  return (
+    <div style={{ marginTop: 10, textAlign: align }}>
+      {links.map(({ prefix, to, label, linkStyle }, idx) => (
+        <p key={idx} style={{ margin: `${idx ? gap : 0}px 0 0 `}}>
+          {prefix ? <span>{prefix} </span> : null}
+          <Link
+            to={to}
+            style={{ color: "#FF6600", fontWeight: "bold", ...(linkStyle || {}) }}
+          >
+            {label}
+          </Link>
+        </p>
+      ))}
+    </div>
+  );
 }
+
+RedirecionamentoLinks.propTypes = {
+  links: PropTypes.arrayOf(
+    PropTypes.shape({
+      prefix: PropTypes.string,     
+      to: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      linkStyle: PropTypes.object,  
+    })
+  ),
+  align: PropTypes.string,
+  gap: PropTypes.number,
+};
