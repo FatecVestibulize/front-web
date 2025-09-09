@@ -3,15 +3,21 @@ import imagemBanner from "../assets/imagem-banner.png";
 
 export default function Banner() {
   return (
+    
     <div
       style={{
         position: "relative",
         width: "50vw",
         height: "100vh",
-        backgroundColor: "#facc15",
-        overflow: "hidden", // corta qualquer sobra
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        position: "absolute",
+        height: "832px",
+        left: "0px",
+        right: "652px",
+        top: "0px",
+        background: "linear-gradient(143.35deg, #FFC514 68.63%, #000000 166.73%)",
       }}
     >
       {/* Logo no topo */}
@@ -21,7 +27,7 @@ export default function Banner() {
         style={{
           width: "100%",
           height: "auto",
-          display: "block",    // remove espaço extra de imagem inline
+          display: "block",    
           objectFit: "cover",
         }}
       />
@@ -32,7 +38,8 @@ export default function Banner() {
         style={{
           position: "absolute",
           left: "50%",
-          bottom: 0,                   
+          bottom: 0, 
+          width: "100%",                  
           transform: "translateX(-50%)",
           maxWidth: "100%",
           height: "auto",
