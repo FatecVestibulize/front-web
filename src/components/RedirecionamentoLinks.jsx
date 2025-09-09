@@ -8,10 +8,11 @@ export default function RedirecionamentoLinks({ links = [], align = "center", ga
     <div style={{ marginTop: 10, textAlign: align }}>
       {links.map(({ prefix, to, label, linkStyle }, idx) => (
         <p key={idx} style={{ margin: `${idx ? gap : 0}px 0 0 `}}>
-          {prefix ? <span>{prefix} </span> : null}
+          {prefix ? <span style={{color: "#7A7A7A"}}>{prefix} </span> : null}
           <Link
             to={to}
-            style={{ color: "#FF6600", fontWeight: "bold", ...(linkStyle || {}) }}
+            style={{ color: "#F58220", fontWeight: "bold", fontFamily: "'Inter', sans-serif", 
+              textDecoration: "none", ...(linkStyle || {}) }}
           >
             {label}
           </Link>
