@@ -13,9 +13,8 @@ export default function Banner() {
         display: "flex",
         flexDirection: "column",
         position: "absolute",
-        height: "832px",
+        height: "100%",
         left: "0px",
-        right: "652px",
         top: "0px",
         background: "linear-gradient(143.35deg, #FFC514 68.63%, #000000 166.73%)",
       }}
