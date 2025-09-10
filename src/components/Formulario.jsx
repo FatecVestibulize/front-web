@@ -37,7 +37,6 @@ const Formulario = ({ titulo, subtitulo, children }) => {
 
       <form
         style={{
-          textAlign: "center",
           display: "flex",
           flexDirection: "column",
           gap: "14px",
