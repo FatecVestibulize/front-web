@@ -58,7 +58,6 @@ function EsqueciSenha() {
           <Button label="Recuperar senha" onClick={handleSubmit}/>
           <RedirecionamentoLinks links={[
             { prefix: "Lembrou sua senha? ", to:"/login", label:"Faça login", linkStyle:{} },
-            { prefix: "Não possui conta? ", to:"/cadastro", label:"Cadastre-se", linkStyle:{} }
           ]}/>
         </Formulario>
       </div>
