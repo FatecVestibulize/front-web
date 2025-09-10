@@ -1,10 +1,8 @@
 import EsqueciSenha from "./pages/EsqueciSenha"
-
+import Login from "./pages/Login"
 function App() {
-
   return (
     <>
-    <EsqueciSenha/>
     </>
   )
 }
