@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import Banner from "../components/Banner"
 import Formulario from "../components/Formulario"
 import InputText from "../components/InputText"
@@ -7,6 +8,7 @@ import RedirecionamentoLinks from "../components/RedirecionamentoLinks"
 import apiVestibulizeClient from "../utils/apiVestibulizeClient"
 
 function Login() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     usuario: "",
     senha:""
@@ -29,8 +31,18 @@ function Login() {
 
     try {
       const response = await apiVestibulizeClient.post('user/login', payload)
-      alert("Login realizado com sucesso!")
-      console.log(response.data)
+      
+      // Salva o token e dados do usuário no localStorage
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token)
+        localStorage.setItem('userData', JSON.stringify({
+          username: usuario,
+          email: response.data.email || ''
+        }))
+        alert("Login realizado com sucesso!")
+      } else {
+        alert("Resposta inválida do servidor")
+      }
     } catch (error) {
       console.error(error)
       alert("Erro ao fazer login. Tente novamente.")
