@@ -83,7 +83,7 @@ function Cadastro() {
           <InputText label="Confirmar senha" id="confirmar" type="password" value={formData.confirmar} onChange={handleChange} />
           <Button label="CADASTRAR" onClick={handleSubmit} />
           <RedirecionamentoLinks links={[
-            { prefix: "Caso tenha cadastro, ", to:"/login", label:"clique aqui", linkStyle:{} }
+            { prefix: "Já tem cadastro? ", to:"/login", label:"Clique aqui", linkStyle:{} }
           ]}/>
         </Formulario>
       </div>
