@@ -7,15 +7,17 @@ const Button = ({ label, onClick, type = "button", className = "" }) => {
     <button
       type={type}
       onClick={onClick}
-      className={`w-full ${className}`}
+      className={`w-auto px-10 ${className}`}
       style={{
         backgroundColor: hover ? "#EE7F36" : "#4A4C78",
         color: "white",
         border: "none",
         borderRadius: "8px",
-        padding: "10px",
+        padding: "10px 100px",
         cursor: "pointer",
-        transition: "background-color 0.3s ease"
+        transition: "background-color 0.3s ease",
+        display: "block",
+        margin: "0 auto"
       }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}

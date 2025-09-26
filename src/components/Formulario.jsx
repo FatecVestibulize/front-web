@@ -8,7 +8,7 @@ const Formulario = ({ titulo, subtitulo, children }) => {
           style={{
             fontSize: "1.8rem",
             color: "#f97316",
-            fontWeight: "700",
+            fontWeight: "400",
             marginBottom: "0.3rem",
             fontFamily: "'Inter', sans-serif",
           }}
