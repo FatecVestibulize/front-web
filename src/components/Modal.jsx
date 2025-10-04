@@ -31,7 +31,9 @@ const Modal = ({ isOpen, onClose, children }) => {
   return (
     <div style={overlayStyle} onClick={handleOverlayClick}>
       <div style={contentWrapperStyle}>
-        {children}
+        <div style={{width: '500px', height: '500px', backgroundColor: 'white'}}>
+         {children}
+        </div>
       </div>
     </div>
   );

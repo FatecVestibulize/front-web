@@ -6,6 +6,7 @@ import InputText from "../components/InputText"
 import Button from "../components/Button"
 import RedirecionamentoLinks from "../components/RedirecionamentoLinks"
 import apiVestibulizeClient from "../utils/apiVestibulizeClient"
+import Modal from "../components/Modal"
 
 function Login() {
   const navigate = useNavigate()
@@ -54,12 +55,32 @@ function Login() {
     handleLogin(formData)
   }
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+  }
+
+  const teste = () => {
+    console.log('teste')
+  }
+
+  const childrenJSX = (
+      <button onClick={teste}>Teste</button>
+  )
+  const [isModalOpen, setIsModalOpen] = useState(false) 
+
   return (
     <div style={{display: 'flex', width: '100%', height: '100%'}}>
       <div style={{width: '50vw', height: '100%'}}>
         <Banner />
       </div>
       <div style={{width: '50vw', padding: '100px'}}>
+        <Modal isOpen={isModalOpen} onClose={handleCloseModal} children={childrenJSX}>
+        </Modal>
+        <button onClick={handleOpenModal}>Abrir Modal</button>
         <Formulario titulo="Login" subtitulo="Faça seu login para continuar">
           <InputText label="Usuário" id="usuario" type="text" value={formData.usuario} onChange={handleChange}/>
           <InputText label="Senha" id="senha" type="password" value={formData.senha} onChange={handleChange} />

@@ -12,6 +12,8 @@ function App() {
       <Route path="/esqueci-senha" element={<EsqueciSenha />} />
     </Routes>
   );
+
+  return routes;
 }
 
 export default App;
