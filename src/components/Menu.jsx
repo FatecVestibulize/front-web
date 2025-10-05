@@ -6,7 +6,7 @@ export default function Menu() {
   const [open, setOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState(null);
 
-  const links = [
+  const baseLinks = [
     { to: "/inicio", label: "Início" },
     { to: "/caderno", label: "Caderno" },
     { to: "/metas", label: "Metas" },
@@ -14,6 +14,10 @@ export default function Menu() {
     { to: "/forum", label: "Fórum" },
     { to: "/datas", label: "Datas" },
   ];
+
+  const links = isMobile
+    ? [...baseLinks, { to: "/perfil", label: "Perfil" }]
+    : baseLinks;
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -38,8 +42,12 @@ export default function Menu() {
               flexDirection: "column",
               justifyContent: "space-between",
               alignItems: "center",
-              position: "relative",
-              zIndex: 1100,
+              position: "fixed",
+              top: "17px",
+              left: open ? "50%" : "20px", 
+              transform: open ? "translateX(-50%)" : "translateX(0)",
+              transition: "left 0.5s ease, transform 0.5s ease",
+              zIndex: 1200,
             }}
           >
             <span
@@ -150,7 +158,7 @@ export default function Menu() {
                   lineHeight: "21px",
                   color: hoveredLink === idx ? "#F58220" : "#FFFFFF",
                   textDecoration: "none",
-                  fontWeight: hoveredLink === idx ? "bold" : "normal",
+                  fontWeight: "normal",
                   cursor: "pointer",
                   transition: "color 0.3s ease, font-weight 0.3s ease",
                 }}

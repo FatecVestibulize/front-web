@@ -50,9 +50,8 @@ export default function Navbar() {
           <Menu />
         </div>
       ) : (
-        <IconePerfil />
+        <Menu />
       )}
-      {isMobile && <Menu />}
       <ImagemVestibulize />
     </div>
   );
