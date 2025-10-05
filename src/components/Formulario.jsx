@@ -30,6 +30,7 @@ const Formulario = ({ titulo, subtitulo, children }) => {
         style={{
           border: "0",
           height: "1px",
+          width: "100%",
           backgroundColor: "#7A7A7A",
           margin: "1rem 0 1.5rem 0",
         }}
