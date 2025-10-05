@@ -1,8 +1,68 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import InputText from "./InputText";
 import Button from "./Button";
 
-const Header = ({ title, searchText, onSearchChange, onAddClick }) => {
+const useScreenSize = (breakpoint = 768) => {
+  const [width, setWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return width <= breakpoint;
+};
+
+
+const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlaceholder, addButtonLabel }) => {
+  
+  const isMobile = useScreenSize(768); 
+  
+  const buttonLabel = addButtonLabel || "Adicionar Anotação";
+  const inputPlaceholder = isMobile ? "Pesquisar..." : (searchPlaceholder || "Pesquisar por título...");
+
+  const inputContainerStyle = {
+    flex: 1,
+    maxWidth: isMobile ? "none" : "450px",
+    height: "40px",
+    textAlign: "left",
+  };
+
+  const buttonContainerStyle = {
+    width: isMobile ? "40px" : "220px",
+    height: "40px",
+    flexShrink: isMobile ? 0 : 1, 
+  };
+  
+  const nativeButtonStyle = {
+    backgroundColor: "#625997",
+    height: "100%",
+    width: "100%",
+    borderRadius: "50%",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    
+    fontSize: "36px", 
+    paddingBottom: '2px',
+    fontWeight: "bold",
+  };
+
+  const componentButtonStyle = {
+    backgroundColor: "#625997",
+    height: "100%",
+    width: "100%",
+    padding: "0 15px",
+    fontSize: "15px",
+    fontWeight: "600",
+    borderRadius: "6px",
+  };
+
   return (
     <div
       style={{
@@ -17,7 +77,6 @@ const Header = ({ title, searchText, onSearchChange, onAddClick }) => {
         zIndex: 100,
       }}
     >
-      {/*Titulo*/}
       <h1
         style={{
           fontFamily: "'Inter', sans-serif",
@@ -25,7 +84,6 @@ const Header = ({ title, searchText, onSearchChange, onAddClick }) => {
           fontSize: "45px",
           color: "white",
           margin: 0,
-          padding: 0,
           marginBottom: "15px",
         }}
       >
@@ -43,54 +101,40 @@ const Header = ({ title, searchText, onSearchChange, onAddClick }) => {
         }}
       />
 
-      {/*Barra de ação*/}
       <div
         style={{
           display: "flex",
-          flexDirection: "row-reverse",
-          justifyContent: "center",
+          justifyContent: "space-between",
           alignItems: "center",
-          gap: "15px",
-          maxWidth: "800px",
+          maxWidth: "1100px",
           margin: "0 auto",
-          padding: "0 20px",
+          padding: isMobile ? "0 20px" : "0 60px", 
+          gap: isMobile ? "10px" : "20px", 
         }}
       >
-        {/*Contêiner do Botão*/}
-        <div
-          style={{
-            width: '120px',
-            flexShrink: 0,
-            height: '40px',
-          }}
-        >
-          <Button
-            label="ADICIONAR"
-            onClick={onAddClick}
-            className="h-full"
-            style={{
-              backgroundColor: '#625997',
-              height: '100%',
-              padding: '0 5px',
-              fontSize: '15px',
-              fontWeight: '600',
-              borderRadius: '6px',
-            }}
-          />
-        </div>
-        {/*Contêiner do InputText:*/}
-        <div
-          style={{
-            flex: "1",
-            minWidth: "250px",
-            height: '40px',
-          }}
-        >
+        <div style={inputContainerStyle}>
           <InputText
-            placeholder="Pesquisar por Título..."
+            placeholder={inputPlaceholder}
             value={searchText}
             onChange={onSearchChange}
           />
+        </div>
+
+        <div style={buttonContainerStyle}>
+          {isMobile ? (
+            <button 
+              onClick={onAddClick}
+              style={nativeButtonStyle}
+            >
+              +
+            </button>
+          ) : (
+            <Button
+              label={buttonLabel} 
+              onClick={onAddClick}
+              style={componentButtonStyle} 
+            />
+          )}
         </div>
       </div>
     </div>
