@@ -10,7 +10,7 @@ const CARD_COLORS = {
   dataText: "#888888",
 };
 
-const Card = ({ titulo, data, actions }) => {
+const Card = ({ titulo, data, actions, onClick }) => {
   const [isHovered, setIsHovered] = React.useState(false);
 
   const cardStyle = {
@@ -55,6 +55,7 @@ const Card = ({ titulo, data, actions }) => {
       style={cardStyle}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={onClick} 
     >
       <div style={contentContainerStyle}>
         <div style={textBlockStyle}>
