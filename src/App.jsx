@@ -9,7 +9,7 @@ function App() {
   return (
     <div>
       <Navbar />
-      <div style={{ paddingTop: "50px" }}>
+      <div style={{ paddingTop: localStorage.getItem('token') ? "50px" : "0px" }}>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
