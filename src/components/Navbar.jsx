@@ -23,7 +23,7 @@ export default function Navbar() {
     width: "100%",
     height: "55px",
     backgroundColor: "#4a4c78",
-    display: "flex",
+    display: localStorage.getItem('token') ? "flex" : "none",
     alignItems: "center",
     justifyContent: "space-between",
     padding: "0 25px",
