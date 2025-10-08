@@ -11,7 +11,7 @@ export default function RedirecionamentoLinks({ links = [], align = "center", ga
           {prefix ? <span style={{color: "#7A7A7A"}}>{prefix} </span> : null}
           <Link
             to={to}
-            style={{ color: "#F58220", fontWeight: "bold", fontFamily: "'Inter', sans-serif", 
+            style={{ color: "#F58220", fontWeight: "", fontFamily: "'Inter', sans-serif", 
               textDecoration: "none", ...(linkStyle || {}) }}
           >
             {label}
