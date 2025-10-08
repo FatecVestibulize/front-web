@@ -1,52 +1,62 @@
-import logo from "../assets/logo.png";
+import logo from "../assets/logo-isolada.png";
 import imagemBanner from "../assets/imagem-banner.png";
 
-export default function Banner() {
+export default function Banner({ isMobile }) {
   return (
-    
     <div
       style={{
         position: "relative",
-        width: "50vw",
-        height: "100vh",
+        height: isMobile ? "fit-content" : "100vh",
         overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        position: "absolute",
-        height: "100%",
-        left: "0px",
-        top: "0px",
-        background: "linear-gradient(143.35deg, #FFC514 68.63%, #000000 166.73%)",
+        backgroundImage: "linear-gradient(143.35deg, #FFC514 68.63%, #000000 166.73%)"
       }}
     >
-      {/* Logo no topo */}
-      <img
-        src={logo}
-        alt="Logo Vestibulize"
+      {/* Faixa roxa inclinada (topo) */}
+      <div
         style={{
-          width: "100%",
-          height: "auto",
-          display: "block",    
-          objectFit: "cover",
+          height: "30%",
+          backgroundColor: "#4A4C78",
+          clipPath: isMobile ? "none" : "polygon(0px 0, 100% 0px, 100% 50%, 0px 100%)",
+          textAlign: "center",
         }}
-      />
+      >
 
-      <img
-        src={imagemBanner}
-        alt="Estudante"
+        {/* Logo limpa (transparente) */}
+        <img
+          src={logo}
+          alt="Logo Vestibulize"
+          style={{
+            width: isMobile ? "100%" : "auto",
+            margin: isMobile ? "20px 0px" : 20,
+          }}
+        />
+
+      </div>
+
+      <div
         style={{
+          display: isMobile ? "none" : "flex",
           position: "absolute",
-          left: "50%",
-          bottom: 0, 
-          width: "100%",                  
-          transform: "translateX(-50%)",
-          maxWidth: "100%",
-          height: "auto",
-          display: "block",
-          pointerEvents: "none",
-          userSelect: "none",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          justifyContent: "center",
+          alignItems: "flex-end"
         }}
-      />
+      >
+        {/* Juninha */}
+        <img
+          src={imagemBanner}
+          alt="Estudante"
+          style={{
+            width: "100%",
+            height: "auto",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
+      </div>
+      
     </div>
   );
 }
