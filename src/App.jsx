@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
 import EsqueciSenha from "./pages/EsqueciSenha";
 import Navbar from "./components/Navbar";
+import Caderno from "./pages/Caderno";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+          <Route path="/caderno" element={<Caderno />} />
         </Routes>
       </div>
     </div>
