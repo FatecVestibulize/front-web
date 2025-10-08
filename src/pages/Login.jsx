@@ -40,6 +40,7 @@ function Login() {
           email: response.data.email || ''
         }))
         alert("Login realizado com sucesso!")
+        navigate('/caderno')
       } else {
         alert("Resposta inválida do servidor")
       }

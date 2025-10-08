@@ -1,7 +1,7 @@
 import React from "react";
 import Card from "./Card";
 
-const Listagem = ({ anotacoes, headerTitle, headerActions, cardActionsGenerator, onCardClick }) => {
+const Listagem = ({ listagem, headerTitle, headerActions, cardActionsGenerator, onCardClick }) => {
 
   return (
     <section>
@@ -21,7 +21,7 @@ const Listagem = ({ anotacoes, headerTitle, headerActions, cardActionsGenerator,
         <span style={{ paddingRight: "90px" }}>{headerActions}</span>
       </div>
 
-      {anotacoes.map((a, index) => (
+      {listagem.map((a, index) => (
         <Card
           key={a.id || index}
           titulo={a.titulo}
