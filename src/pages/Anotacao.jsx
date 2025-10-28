@@ -7,7 +7,8 @@ import Listagem from "../components/Listagem";
 import Modal from "../components/Modal";
 import { useNavigate, useParams } from 'react-router-dom'; 
 import apiVestibulizeClient from "../utils/apiVestibulizeClient";
-import InputTextArea from "../components/InputTextArea";
+import InputTextArea from "../components/InputTextArea"
+import Navbar from "../components/Navbar";
 
 const Anotacao = () => {
 
@@ -302,6 +303,7 @@ const Anotacao = () => {
 
     return (
         <main style={{ background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
+            <Navbar />
             <Header
                 title="Anotações"
                 searchText={filtro}

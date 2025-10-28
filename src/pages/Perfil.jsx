@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import PerfilHeader from "../components/PerfilHeader";
 import PerfilAtalhos from "../components/PerfilAtalhos";
 import ListaAmigos from "../components/ListaAmigos";
+import Navbar from "../components/Navbar";
 
 export default function Perfil() {
   const [dropdownAberto, setDropdownAberto] = useState(false);
@@ -12,6 +13,7 @@ export default function Perfil() {
 
   return (
     <>
+    <Navbar />
       <style>
         {`
           .perfil-container {

@@ -8,6 +8,7 @@ import Listagem from "../components/Listagem";
 import Modal from "../components/Modal";
 import { useNavigate } from 'react-router-dom'; 
 import apiVestibulizeClient, { traitExpiredToken } from "../utils/apiVestibulizeClient";
+import Navbar from "../components/Navbar";
 
 const Caderno = () => {
 
@@ -258,6 +259,7 @@ const Caderno = () => {
 
     return (
         <main style={{ background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
+            <Navbar />
             <Toast ref={toast} position="bottom-right"/>
 
             <Header
