@@ -19,6 +19,8 @@ const Prova = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProva, setEditingProva] = useState(null);
     const [titulo, setTitulo] = useState("");
+    const [data, setData] = useState("");
+    const [descricao, setDescricao] = useState("");
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [viewingProva, setViewingProva] = useState(null);
 
@@ -73,10 +75,9 @@ const Prova = () => {
         }
         const dados = {
             id: editingProva ? editingProva.id : null,
-            title: titulo,
-            // description: descricao,
-            // deadline: dataLimite,
-            // priority: prioridade,
+            name: titulo,
+            date: data + 'T00:00:00',
+            description: descricao,
         };
 
         if (editingProva) {
@@ -165,12 +166,6 @@ const Prova = () => {
             <div style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                     <label htmlFor="titulo" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Título da Prova</label>
-                    <i id="tooltip-icon-titulo" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-titulo" 
-                        content="Digite um título claro e objetivo para sua prova." 
-                        position="top" 
-                    />
                 </div>
                 <InputText
                     id="titulo"
@@ -180,16 +175,23 @@ const Prova = () => {
                     autoFocus
                 />
             </div>
-{/* 
+
+            <div style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                    <label htmlFor="data" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Data da Prova</label>
+                </div>
+                <InputText
+                    id="data"
+                    value={data}
+                    onChange={(e) => setData(e.target.value)}
+                    style={formStyles.input}
+                    autoFocus
+                />
+            </div>
+
             <div style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                     <label htmlFor="descricao" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Descrição</label>
-                    <i id="tooltip-icon-descricao" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-descricao" 
-                        content="Descreva detalhadamente o que você quer alcançar com esta prova." 
-                        position="top" 
-                    />
                 </div>
                 <InputTextArea
                     id="descricao"
@@ -198,47 +200,7 @@ const Prova = () => {
                     style={formStyles.input}
                     autoFocus
                 />
-            </div> */}
-{/* 
-            <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <label htmlFor="dataLimite" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Data Limite</label>
-                    <i id="tooltip-icon-dataLimite" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-dataLimite" 
-                        content="Defina uma data limite para alcançar esta prova." 
-                        position="top" 
-                    />
-                </div>
-                <InputText
-                    id="dataLimite"
-                    type="date"
-                    value={dataLimite}
-                    onChange={(e) => setDataLimite(e.target.value)}
-                    style={formStyles.input}
-                    autoFocus
-                />
-            </div> */}
-{/* 
-            <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <label htmlFor="prioridade" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Prioridade</label>
-                    <i id="tooltip-icon-prioridade" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-prioridade" 
-                        content="Defina a prioridade desta prova (Alta, Média, Baixa)." 
-                        position="top" 
-                    />
-                </div>
-                <InputText
-                    id="prioridade"
-                    value={prioridade}
-                    onChange={(e) => setPrioridade(e.target.value)}
-                    style={formStyles.input}
-                    placeholder="Ex: Alta, Média, Baixa"
-                    autoFocus
-                />
-            </div> */}
+            </div>
 
             <Button
                 label={editingProva ? "ATUALIZAR" : "ADICIONAR"}
