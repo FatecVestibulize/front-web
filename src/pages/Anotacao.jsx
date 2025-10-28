@@ -9,10 +9,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import apiVestibulizeClient from "../utils/apiVestibulizeClient";
 import InputTextArea from "../components/InputTextArea"
 import Navbar from "../components/Navbar";
+import { Toast } from 'primereact/toast';
 
 const Anotacao = () => {
 
     const navigate = useNavigate();
+    const toast = useRef(null);
+
     const { notebook_id } = useParams();
 
     const [filtro, setFiltro] = useState("");
@@ -79,7 +82,7 @@ const Anotacao = () => {
 
     const handleSave = async () => {
         if (!titulo.trim()) {
-            alert("O título é obrigatório!");
+            toast.current?.show({ severity: 'warn', summary: 'Aviso', detail: 'O título é obrigatório!', life: 3000 });
             return;
         }
         const dados = {
@@ -96,12 +99,12 @@ const Anotacao = () => {
             apiVestibulizeClient.put('note/' + dados.id, dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                alert("Anotacao atualizada com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno atualizado com sucesso!', life: 3000 });
                 getAnotacoes();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao atualizar anotacao. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar caderno. Tente novamente.', life: 3000 });
             }).finally(() => {
                 handleCloseModal();
             });
@@ -111,12 +114,12 @@ const Anotacao = () => {
              apiVestibulizeClient.post('note', dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                alert("Anotacao criada com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno criado com sucesso!', life: 3000 });
                 getAnotacoes();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao criar anotacao. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao criar caderno. Tente novamente.', life: 3000 });
             }).finally(() => {
                 handleCloseModal();
             });
@@ -129,12 +132,12 @@ const Anotacao = () => {
             apiVestibulizeClient.delete('note/' + id, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                    alert("Anotacao excluída com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno excluído com sucesso!', life: 3000 });
                 getAnotacoes();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao excluir anotacao. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir caderno. Tente novamente.', life: 3000 });
             });
         }
     };
@@ -304,6 +307,8 @@ const Anotacao = () => {
     return (
         <main style={{paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
             <Navbar />
+            <Toast ref={toast} position="bottom-right"/>
+
             <Header
                 title="Anotações"
                 searchText={filtro}

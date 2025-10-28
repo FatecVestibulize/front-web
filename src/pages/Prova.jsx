@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Tooltip } from 'primereact/tooltip'; 
+import { Toast } from 'primereact/toast';
 import Header from "../components/Header";
 import Listagem from "../components/Listagem";
 import Modal from "../components/Modal";
 import { useNavigate, useParams } from 'react-router-dom'; 
-import apiVestibulizeClient from "../utils/apiVestibulizeClient";
+import apiVestibulizeClient, { traitExpiredToken } from "../utils/apiVestibulizeClient";
 import InputTextArea from "../components/InputTextArea";
 import Navbar from "../components/Navbar";
 
 const Prova = () => {
 
     const navigate = useNavigate();
+    const toast = useRef(null);
 
     const [filtro, setFiltro] = useState("");
     const [provas, setProvas] = useState([])
@@ -43,9 +45,8 @@ const Prova = () => {
         });
         
         setProvas(response.data.map((item) => ({
-            data: item.created_at === null ? null : new Date(item.created_at).toLocaleDateString("pt-BR"),
+            data: item.date === null ? null : new Date(item.date).toLocaleDateString("pt-BR"),
             titulo: item.name,
-            prova_data: item.date === null ? null : new Date(item.date).toLocaleDateString("pt-BR"),
             id: item.id
         })))
     }
@@ -70,7 +71,7 @@ const Prova = () => {
 
     const handleSave = async () => {
         if (!titulo.trim()) {
-            alert("O título é obrigatório!");
+            toast.current?.show({ severity: 'warn', summary: 'Aviso', detail: 'O título é obrigatório!', life: 3000 });
             return;
         }
         const dados = {
@@ -85,12 +86,12 @@ const Prova = () => {
             apiVestibulizeClient.put('exam/' + dados.id, dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                alert("Prova atualizada com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Prova atualizada com sucesso!', life: 3000 });
                 getProvas();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao atualizar prova. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar prova. Tente novamente.', life: 3000 });
             }).finally(() => {
                 handleCloseModal();
             });
@@ -100,12 +101,12 @@ const Prova = () => {
              apiVestibulizeClient.post('exam', dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                alert("Prova criada com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Prova criada com sucesso!', life: 3000 });
                 getProvas();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao criar prova. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao criar prova. Tente novamente.', life: 3000 });
             }).finally(() => {
                 handleCloseModal();
             });
@@ -118,12 +119,12 @@ const Prova = () => {
             apiVestibulizeClient.delete('exam/' + id, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                    alert("Prova excluída com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Prova excluída com sucesso!', life: 3000 });
                 getProvas();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao excluir prova. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir prova. Tente novamente.', life: 3000 });
             });
         }
     };
@@ -185,6 +186,7 @@ const Prova = () => {
                     value={data}
                     onChange={(e) => setData(e.target.value)}
                     style={formStyles.input}
+                    type="date"
                     autoFocus
                 />
             </div>
@@ -271,6 +273,8 @@ const Prova = () => {
     return (
         <main style={{paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
             <Navbar />
+            <Toast ref={toast} position="bottom-right"/>
+
             <Header
                 title="Datas de Prova"
                 searchText={filtro}

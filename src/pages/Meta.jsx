@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Tooltip } from 'primereact/tooltip'; 
+import { Toast } from 'primereact/toast';
 import Header from "../components/Header";
 import Listagem from "../components/Listagem";
 import Modal from "../components/Modal";
 import { useNavigate, useParams } from 'react-router-dom'; 
-import apiVestibulizeClient from "../utils/apiVestibulizeClient";
+import apiVestibulizeClient, { traitExpiredToken } from "../utils/apiVestibulizeClient";
 import InputTextArea from "../components/InputTextArea";
 import Navbar from "../components/Navbar";
 
 const Meta = () => {
 
     const navigate = useNavigate();
+    const toast = useRef(null);
 
     const [filtro, setFiltro] = useState("");
     const [metas, setMetas] = useState([])
@@ -79,7 +81,7 @@ const Meta = () => {
 
     const handleSave = async () => {
         if (!titulo.trim()) {
-            alert("O título é obrigatório!");
+            toast.current?.show({ severity: 'warn', summary: 'Aviso', detail: 'O título é obrigatório!', life: 3000 });
             return;
         }
         const dados = {
@@ -95,12 +97,12 @@ const Meta = () => {
             apiVestibulizeClient.put('goal/' + dados.id, dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                alert("Meta atualizada com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Meta atualizada com sucesso!', life: 3000 });
                 getMetas();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao atualizar meta. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar meta. Tente novamente.', life: 3000 });
             }).finally(() => {
                 handleCloseModal();
             });
@@ -110,12 +112,12 @@ const Meta = () => {
              apiVestibulizeClient.post('goal', dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                alert("Meta criada com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Meta criada com sucesso!', life: 3000 });
                 getMetas();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao criar meta. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao criar meta. Tente novamente.', life: 3000 });
             }).finally(() => {
                 handleCloseModal();
             });
@@ -128,11 +130,11 @@ const Meta = () => {
             apiVestibulizeClient.delete('goal/' + id, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                    alert("Meta excluída com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Meta excluída com sucesso!', life: 3000 });
                 getMetas();
             }).catch(error => {
                 console.error(error);
-                alert("Erro ao excluir meta. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir meta. Tente novamente.', life: 3000 });
             });
         }
     };
@@ -319,6 +321,8 @@ const Meta = () => {
     return (
         <main style={{paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
             <Navbar />
+            <Toast ref={toast} position="bottom-right"/>
+
             <Header
                 title="Metas"
                 searchText={filtro}
@@ -352,6 +356,7 @@ const Meta = () => {
              >
                  {viewModalJSX}
              </Modal>
+
         </main>
     );
 };
