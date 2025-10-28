@@ -2,11 +2,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
 import EsqueciSenha from "./pages/EsqueciSenha";
-import Navbar from "./components/Navbar";
 import Caderno from "./pages/Caderno";
 import Anotacao from "./pages/Anotacao";
 import Meta from "./pages/Meta";
 import Prova from "./pages/Prova";
+import Perfil from "./pages/Perfil";
 
 function App() {
   return (
@@ -33,7 +33,10 @@ function App() {
             <ProtectedRoute>
               <Prova />
             </ProtectedRoute>} />
-          <Route path="/caderno" element={<Caderno />} />
+          <Route path="/perfil" element={
+            <ProtectedRoute>
+              <Perfil />
+            </ProtectedRoute>} />
         </Routes>
       </div>
     </div>
