@@ -18,9 +18,22 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
-          <Route path="/caderno/:notebook_id/anotacoes" element={ <Anotacao /> } />
-          <Route path="/metas" element={ <Meta /> } />
-          <Route path="/datas" element={ <Prova /> } />
+          <Route path="/metas" element={
+            <ProtectedRoute>
+              <Meta />
+            </ProtectedRoute>} />
+          <Route path="/caderno" element={
+            <ProtectedRoute>
+              <Caderno />
+            </ProtectedRoute>} />
+          <Route path="/caderno/:notebook_id/anotacoes" element={
+            <ProtectedRoute>
+              <Anotacao />
+            </ProtectedRoute>} />
+          <Route path="/datas" element={
+            <ProtectedRoute>
+              <Prova />
+            </ProtectedRoute>} />
           <Route path="/caderno" element={<Caderno />} />
         </Routes>
       </div>
@@ -28,5 +41,10 @@ function App() {
   );
 }
 
+export const ProtectedRoute = ({ children }) => {
+  return (
+    localStorage.getItem('token') && localStorage.getItem('userData') ? children : <Navigate to="/login" replace />
+  );
+};
 
 export default App;
