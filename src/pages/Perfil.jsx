@@ -13,7 +13,6 @@ export default function Perfil() {
 
   return (
     <>
-    <Navbar />
       <style>
         {`
           .perfil-container {
@@ -49,9 +48,12 @@ export default function Perfil() {
         `}
       </style>
 
+    <Navbar />
+
       <div
         className="perfil-container"
         style={{
+          paddingTop: '55px',
           position: "relative",
           minHeight: "100vh",
           display: "flex",

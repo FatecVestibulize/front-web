@@ -12,7 +12,7 @@ import NotFound from "./pages/NotFound";
 function App() {
   return (
     <div>
-      <div style={{ paddingTop: localStorage.getItem('token') ? "50px" : "0px" }}>
+      <div>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
