@@ -99,6 +99,7 @@ const Anotacao = () => {
                 getAnotacoes();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao atualizar anotacao. Tente novamente.");
             }).finally(() => {
                 handleCloseModal();
@@ -113,6 +114,7 @@ const Anotacao = () => {
                 getAnotacoes();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao criar anotacao. Tente novamente.");
             }).finally(() => {
                 handleCloseModal();
@@ -130,6 +132,7 @@ const Anotacao = () => {
                 getAnotacoes();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao excluir anotacao. Tente novamente.");
             });
         }

@@ -39,6 +39,7 @@ const Meta = () => {
             params: params
         }).catch(error => {
             console.log(error.response.data.message);
+            traitExpiredToken(error.response.data.message);
         });
         
         setMetas(response.data.map((item) => ({
@@ -97,6 +98,7 @@ const Meta = () => {
                 getMetas();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao atualizar meta. Tente novamente.");
             }).finally(() => {
                 handleCloseModal();
@@ -111,6 +113,7 @@ const Meta = () => {
                 getMetas();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao criar meta. Tente novamente.");
             }).finally(() => {
                 handleCloseModal();

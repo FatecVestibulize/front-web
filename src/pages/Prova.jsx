@@ -36,6 +36,7 @@ const Prova = () => {
             params: params
         }).catch(error => {
             console.log(error.response.data.message);
+            traitExpiredToken(error.response.data.message);
         });
         
         setProvas(response.data.map((item) => ({
@@ -86,6 +87,7 @@ const Prova = () => {
                 getProvas();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao atualizar prova. Tente novamente.");
             }).finally(() => {
                 handleCloseModal();
@@ -100,6 +102,7 @@ const Prova = () => {
                 getProvas();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao criar prova. Tente novamente.");
             }).finally(() => {
                 handleCloseModal();
@@ -117,6 +120,7 @@ const Prova = () => {
                 getProvas();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao excluir prova. Tente novamente.");
             });
         }

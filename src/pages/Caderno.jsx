@@ -6,7 +6,7 @@ import Header from "../components/Header";
 import Listagem from "../components/Listagem";
 import Modal from "../components/Modal";
 import { useNavigate } from 'react-router-dom'; 
-import apiVestibulizeClient from "../utils/apiVestibulizeClient";
+import apiVestibulizeClient, { traitExpiredToken } from "../utils/apiVestibulizeClient";
 
 const Caderno = () => {
 
@@ -34,6 +34,9 @@ const Caderno = () => {
                 token: `${localStorage.getItem('token')}` 
             },
             params: params
+        }).catch(error => {
+            console.log(error.response.data.message);
+            traitExpiredToken(error.response.data.message);
         });
         
         setCadernos(response.data.map((item) => ({
@@ -83,6 +86,7 @@ const Caderno = () => {
                 getCadernos();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao atualizar caderno. Tente novamente.");
             }).finally(() => {
                 handleCloseModal();
@@ -96,6 +100,7 @@ const Caderno = () => {
                 alert("Caderno criado com sucesso!");
                 getCadernos();
             }).catch(error => {
+                traitExpiredToken(error.response.data.message);
                 console.error(error);
                 alert("Erro ao criar caderno. Tente novamente.");
             }).finally(() => {
@@ -114,6 +119,7 @@ const Caderno = () => {
                 getCadernos();
             }).catch(error => {
                 console.error(error);
+                traitExpiredToken(error.response.data.message);
                 alert("Erro ao excluir caderno. Tente novamente.");
             });
         }
@@ -271,7 +277,7 @@ const Caderno = () => {
                     headerTitle="Título/Data"
                     headerActions="Ações"
                     cardActionsGenerator={createCardActionsGenerator}
-                    onCardClick={(a) => { navigate(`/caderno/${a.id}`) }} 
+                    onCardClick={(a) => { navigate(`/caderno/${a.id}/anotacoes`) }} 
                 />
             </section>
 

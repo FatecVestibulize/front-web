@@ -7,3 +7,14 @@ export default axios.create({
         'Accept': 'application/json',
     }
 })
+
+export const traitExpiredToken = (responseMessage) => {
+
+    if(responseMessage.includes("JWT expired")){
+        alert("Token expirado. Por favor, faça login novamente.");
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+        navigate('/login');
+    }
+
+}
