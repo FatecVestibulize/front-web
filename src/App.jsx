@@ -7,6 +7,7 @@ import Anotacao from "./pages/Anotacao";
 import Meta from "./pages/Meta";
 import Prova from "./pages/Prova";
 import Perfil from "./pages/Perfil";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
+          <Route path="*" element={<NotFound />} />
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/metas" element={
