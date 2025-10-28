@@ -15,7 +15,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
-          <Route path="/caderno" element={<Caderno />} />
+          <Route path="/caderno/:notebook_id/anotacoes" element={ <Anotacao /> } />
         </Routes>
       </div>
     </div>
