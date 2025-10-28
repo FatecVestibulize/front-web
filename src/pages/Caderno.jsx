@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Tooltip } from 'primereact/tooltip'; 
+import { Toast } from 'primereact/toast';
 import Header from "../components/Header";
 import Listagem from "../components/Listagem";
 import Modal from "../components/Modal";
@@ -11,6 +12,7 @@ import apiVestibulizeClient, { traitExpiredToken } from "../utils/apiVestibulize
 const Caderno = () => {
 
     const navigate = useNavigate();
+    const toast = useRef(null);
 
     const [filtro, setFiltro] = useState("");
     const [cadernos, setCadernos] = useState([])
@@ -26,7 +28,6 @@ const Caderno = () => {
     }, []);
 
     const getCadernos = async () => {
-
         const params = filtro.trim().length > 3 ? { search: filtro.trim() } : {};
 
         const response = await apiVestibulizeClient.get('notebook', { 
@@ -68,59 +69,56 @@ const Caderno = () => {
 
     const handleSave = async () => {
         if (!titulo.trim()) {
-            alert("O título é obrigatório!");
+            toast.current?.show({ severity: 'warn', summary: 'Aviso', detail: 'O título é obrigatório!', life: 3000 });
             return;
         }
+
         const dados = {
             id: editingCaderno ? editingCaderno.id : null,
-            title:titulo,
+            title: titulo,
             description: descricao,
         };
 
         if (editingCaderno) {
-            
             apiVestibulizeClient.put('notebook/' + dados.id, dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                alert("Caderno atualizado com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno atualizado com sucesso!', life: 3000 });
                 getCadernos();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao atualizar caderno. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar caderno. Tente novamente.', life: 3000 });
             }).finally(() => {
                 handleCloseModal();
             });
-
         } else {
-
-             apiVestibulizeClient.post('notebook', dados, { headers: {
+            apiVestibulizeClient.post('notebook', dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                alert("Caderno criado com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno criado com sucesso!', life: 3000 });
                 getCadernos();
             }).catch(error => {
                 traitExpiredToken(error.response.data.message);
                 console.error(error);
-                alert("Erro ao criar caderno. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao criar caderno. Tente novamente.', life: 3000 });
             }).finally(() => {
                 handleCloseModal();
             });
-
         }
     };
 
     const handleDelete = (id) => {
-        if (window.confirm("Tem certeza que deseja excluir esta anotação?")) {
+        if (window.confirm("Tem certeza que deseja excluir este caderno?")) {
             apiVestibulizeClient.delete('notebook/' + id, { headers: {
                 token: `${localStorage.getItem('token')}` 
             }}).then(response => {
-                alert("Caderno excluído com sucesso!");
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno excluído com sucesso!', life: 3000 });
                 getCadernos();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                alert("Erro ao excluir caderno. Tente novamente.");
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir caderno. Tente novamente.', life: 3000 });
             });
         }
     };
@@ -153,7 +151,6 @@ const Caderno = () => {
         cursor: 'help',
         fontSize: '0.7em',
     };
-
 
     const modalFormJSX = (
         <form
@@ -197,7 +194,6 @@ const Caderno = () => {
                     autoFocus
                 />
             </div>
-
 
             <Button
                 label={editingCaderno ? "ATUALIZAR" : "ADICIONAR"}
@@ -262,13 +258,15 @@ const Caderno = () => {
 
     return (
         <main style={{ background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
+            <Toast ref={toast} position="bottom-right"/>
+
             <Header
                 title="Cadernos"
                 searchText={filtro}
                 onSearchChange={(e) => handleFilterSearch(e)}
                 onAddClick={() => handleOpenModal()}
                 searchPlaceholder="Pesquisar por título."
-                addButtonLabel= "Adicionar Caderno"
+                addButtonLabel="Adicionar Caderno"
             />
 
             <section style={{ padding: "0 20px", maxWidth: "1000px", margin: "30px auto" }}>
@@ -281,21 +279,21 @@ const Caderno = () => {
                 />
             </section>
 
-             <Modal
-                 isOpen={isModalOpen}
-                 onClose={handleCloseModal}
-                 title={editingCaderno ? "Atualizar - Caderno" : "Adicionar - Caderno"}
-             >
-                 {modalFormJSX}
-             </Modal>
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title={editingCaderno ? "Atualizar - Caderno" : "Adicionar - Caderno"}
+            >
+                {modalFormJSX}
+            </Modal>
 
-             <Modal
-                 isOpen={isViewModalOpen}
-                 onClose={handleCloseViewModal}
-                 title={viewingCaderno ? `Visualizar - ${viewingCaderno.titulo}` : "Visualizar Caderno"}
-             >
-                 {viewModalJSX}
-             </Modal>
+            <Modal
+                isOpen={isViewModalOpen}
+                onClose={handleCloseViewModal}
+                title={viewingCaderno ? `Visualizar - ${viewingCaderno.titulo}` : "Visualizar Caderno"}
+            >
+                {viewModalJSX}
+            </Modal>
         </main>
     );
 };
