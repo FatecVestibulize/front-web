@@ -14,9 +14,14 @@ function App() {
     <div>
       <div>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/" element={ (localStorage.getItem('token') ? 
+            <ProtectedRoute>
+              <Perfil />
+            </ProtectedRoute> : 
+            <Login />) 
+          } />
+          {/* <Route path="/login" element={<Login />} /> */}
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/metas" element={

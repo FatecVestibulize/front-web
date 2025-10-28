@@ -63,7 +63,7 @@ function Login() {
           life: 2000
         })
 
-        setTimeout(() => navigate('/caderno'), 2000)
+        navigate('/')
       } else {
         toast.current.show({
           severity: 'error',

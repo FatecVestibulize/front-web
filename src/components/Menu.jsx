@@ -7,12 +7,12 @@ export default function Menu() {
   const [hoveredLink, setHoveredLink] = useState(null);
 
   const baseLinks = [
-    { to: "/inicio", label: "Início" },
+    { to: "/", label: "Início" },
     { to: "/caderno", label: "Caderno" },
     { to: "/metas", label: "Metas" },
+    { to: "/datas", label: "Datas" },
     { to: "/quiz", label: "Quiz" },
     { to: "/forum", label: "Fórum" },
-    { to: "/datas", label: "Datas" },
   ];
 
   const links = isMobile
