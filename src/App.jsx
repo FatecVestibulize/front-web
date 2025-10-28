@@ -5,6 +5,7 @@ import EsqueciSenha from "./pages/EsqueciSenha";
 import Navbar from "./components/Navbar";
 import Caderno from "./pages/Caderno";
 import Anotacao from "./pages/Anotacao";
+import Meta from "./pages/Meta";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/caderno/:notebook_id/anotacoes" element={ <Anotacao /> } />
+          <Route path="/metas" element={ <Meta /> } />
           <Route path="/caderno" element={<Caderno />} />
         </Routes>
       </div>
