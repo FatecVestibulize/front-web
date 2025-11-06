@@ -53,7 +53,7 @@ export default function Perfil() {
       <div
         className="perfil-container"
         style={{
-          paddingTop: '55px',
+          paddingTop: window.innerWidth >= 768 ? '90px' : '65px',
           position: "relative",
           minHeight: "100vh",
           display: "flex",
