@@ -56,11 +56,12 @@ export default function IconePerfil() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userData");
-    window.location.href = "/login";
+    window.location.reload();
+    window.location.href = "/";
   };
 
   const handleClick = () => {
-    if (loggedIn) navigate("/perfil");
+    if (loggedIn) navigate("/");
   };
 
   const baseContainerStyle = {
