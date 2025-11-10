@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Tooltip } from 'primereact/tooltip'; 
@@ -6,10 +6,11 @@ import Header from "../components/Header";
 import Listagem from "../components/Listagem";
 import Modal from "../components/Modal";
 import { useNavigate, useParams } from 'react-router-dom'; 
-import apiVestibulizeClient from "../utils/apiVestibulizeClient";
-import InputTextArea from "../components/InputTextArea"
+import apiVestibulizeClient, { traitExpiredToken } from "../utils/apiVestibulizeClient";
+import InputTextArea from "../components/InputTextArea";
 import Navbar from "../components/Navbar";
 import { Toast } from 'primereact/toast';
+import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 
 const Anotacao = () => {
 
@@ -19,7 +20,7 @@ const Anotacao = () => {
     const { notebook_id } = useParams();
 
     const [filtro, setFiltro] = useState("");
-    const [anotacoes, setAnotacoes] = useState([])
+    const [anotacoes, setAnotacoes] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAnotacao, setEditingAnotacao] = useState(null);
     const [titulo, setTitulo] = useState("");
@@ -34,27 +35,25 @@ const Anotacao = () => {
     }, []);
 
     const getAnotacoes = async () => {
-
         const params = filtro.trim().length > 3 ? { search: filtro.trim() } : {};
-
         const response = await apiVestibulizeClient.get(`notebook/${notebook_id}/notes`, { 
-            headers: {
-                token: `${localStorage.getItem('token')}` 
-            },
+            headers: { token: `${localStorage.getItem('token')}` },
             params: params
         }).catch(error => {
-            alert("Erro ao buscar anotacoes. Tente novamente.");
+            toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao buscar anotações.', life: 3000 });
         });
-        
-        setAnotacoes(response.data.map((item) => ({
-            data: item.created_at === null ? null : new Date(item.created_at).toLocaleDateString("pt-BR"),
-            titulo: item.title,
-            anotacao: item.content,
-            pergunta: item.questions,
-            sumario: item.summary,
-            id: item.id
-        })))
-    }
+
+        if (response?.data) {
+            setAnotacoes(response.data.map((item) => ({
+                data: item.created_at === null ? null : new Date(item.created_at).toLocaleDateString("pt-BR"),
+                titulo: item.title,
+                anotacao: item.content,
+                pergunta: item.questions,
+                sumario: item.summary,
+                id: item.id
+            })));
+        }
+    };
 
     const handleOpenModal = (item = null) => {
         setIsViewModalOpen(false);
@@ -78,7 +77,7 @@ const Anotacao = () => {
     const handleCloseViewModal = () => {
         setIsViewModalOpen(false);
         setViewingAnotacao(null);
-    }
+    };
 
     const handleSave = async () => {
         if (!titulo.trim()) {
@@ -87,7 +86,7 @@ const Anotacao = () => {
         }
         const dados = {
             id: editingAnotacao ? editingAnotacao.id : null,
-            title:titulo,
+            title: titulo,
             notebook_id: notebook_id,
             content: anotacao,
             questions: pergunta,
@@ -95,51 +94,52 @@ const Anotacao = () => {
         };
 
         if (editingAnotacao) {
-            
             apiVestibulizeClient.put('note/' + dados.id, dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
-            }}).then(response => {
-                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno atualizado com sucesso!', life: 3000 });
+            }}).then(() => {
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Anotação atualizada com sucesso!', life: 3000 });
                 getAnotacoes();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar caderno. Tente novamente.', life: 3000 });
-            }).finally(() => {
-                handleCloseModal();
-            });
-
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar anotação.', life: 3000 });
+            }).finally(() => handleCloseModal());
         } else {
-
-             apiVestibulizeClient.post('note', dados, { headers: {
+            apiVestibulizeClient.post('note', dados, { headers: {
                 token: `${localStorage.getItem('token')}` 
-            }}).then(response => {
-                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno criado com sucesso!', life: 3000 });
+            }}).then(() => {
+                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Anotação criada com sucesso!', life: 3000 });
                 getAnotacoes();
             }).catch(error => {
                 console.error(error);
                 traitExpiredToken(error.response.data.message);
-                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao criar caderno. Tente novamente.', life: 3000 });
-            }).finally(() => {
-                handleCloseModal();
-            });
-
+                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao criar anotação.', life: 3000 });
+            }).finally(() => handleCloseModal());
         }
     };
 
-    const handleDelete = (id) => {
-        if (window.confirm("Tem certeza que deseja excluir esta anotação?")) {
-            apiVestibulizeClient.delete('note/' + id, { headers: {
-                token: `${localStorage.getItem('token')}` 
-            }}).then(response => {
-                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno excluído com sucesso!', life: 3000 });
-                getAnotacoes();
-            }).catch(error => {
-                console.error(error);
-                traitExpiredToken(error.response.data.message);
-                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir caderno. Tente novamente.', life: 3000 });
-            });
-        }
+    const confirmDelete = (id) => {
+        confirmDialog({
+            message: 'Tem certeza que deseja excluir esta anotação?',
+            header: 'Confirmar exclusão',
+            icon: 'pi pi-exclamation-triangle',
+            acceptClassName: 'p-button-text p-button-success',
+            rejectClassName: 'p-button-text p-button-danger',
+            acceptLabel: 'Sim, excluir',
+            rejectLabel: 'Cancelar',
+            accept: () => {
+                apiVestibulizeClient.delete('note/' + id, { headers: {
+                    token: `${localStorage.getItem('token')}` 
+                }}).then(() => {
+                    toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Anotação excluída com sucesso!', life: 3000 });
+                    getAnotacoes();
+                }).catch(error => {
+                    console.error(error);
+                    traitExpiredToken(error.response.data.message);
+                    toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir anotação.', life: 3000 });
+                });
+            }
+        });
     };
 
     const formStyles = {
@@ -171,143 +171,65 @@ const Anotacao = () => {
         fontSize: '0.7em',
     };
 
-
     const modalFormJSX = (
-        <form
-            onSubmit={(e) => { e.preventDefault(); handleSave(); }}
-            style={{ display: "flex", flexDirection: "column" }}
-        >
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                     <label htmlFor="titulo" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Título</label>
                     <i id="tooltip-icon-titulo" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-titulo" 
-                        content="Seção para o nome do curso, tema, data, etc." 
-                        position="top" 
-                    />
+                    <Tooltip target="#tooltip-icon-titulo" content="Seção para o nome do curso, tema, data, etc." position="top" />
                 </div>
-                <InputText
-                    id="titulo"
-                    value={titulo}
-                    onChange={(e) => setTitulo(e.target.value)}
-                    style={formStyles.input}
-                    autoFocus
-                />
+                <InputText id="titulo" value={titulo} onChange={(e) => setTitulo(e.target.value)} style={formStyles.input} autoFocus />
             </div>
 
             <div style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                     <label htmlFor="anotacao" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Anotação</label>
                     <i id="tooltip-icon-anotacao" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-anotacao" 
-                        content="Seção para as anotações com conceitos e ideias principais." 
-                        position="top" 
-                    />
+                    <Tooltip target="#tooltip-icon-anotacao" content="Seção para as anotações com conceitos e ideias principais." position="top" />
                 </div>
-                <InputTextArea
-                    id="anotacao"
-                    value={anotacao}
-                    onChange={(e) => setAnotacao(e.target.value)}
-                    style={formStyles.input}
-                    autoFocus
-                />
+                <InputTextArea id="anotacao" value={anotacao} onChange={(e) => setAnotacao(e.target.value)} style={formStyles.input} />
             </div>
 
             <div style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                     <label htmlFor="pergunta" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Perguntas</label>
                     <i id="tooltip-icon-pergunta" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-pergunta" 
-                        content="Seção para revisão destinada para palavras chaves para lembrar do conteúdo." 
-                        position="top" 
-                    />
+                    <Tooltip target="#tooltip-icon-pergunta" content="Seção para revisão destinada a palavras-chave para lembrar do conteúdo." position="top" />
                 </div>
-                <InputText
-                    id="pergunta"
-                    value={pergunta}
-                    onChange={(e) => setPergunta(e.target.value)}
-                    style={formStyles.input}
-                    autoFocus
-                />
+                <InputText id="pergunta" value={pergunta} onChange={(e) => setPergunta(e.target.value)} style={formStyles.input} />
             </div>
 
             <div style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                     <label htmlFor="sumario" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Sumário</label>
                     <i id="tooltip-icon-sumario" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-sumario" 
-                        content="Seção para resumir o que foi entendido sobre o conteúdo." 
-                        position="top" 
-                    />
+                    <Tooltip target="#tooltip-icon-sumario" content="Seção para resumir o que foi entendido sobre o conteúdo." position="top" />
                 </div>
-                <InputText
-                    id="sumario"
-                    value={sumario}
-                    onChange={(e) => setSumario(e.target.value)}
-                    style={formStyles.input}
-                    autoFocus
-                />
+                <InputText id="sumario" value={sumario} onChange={(e) => setSumario(e.target.value)} style={formStyles.input} />
             </div>
 
-            <Button
-                label={editingAnotacao ? "ATUALIZAR" : "ADICIONAR"}
-                style={formStyles.button}
-            />
+            <Button label={editingAnotacao ? "ATUALIZAR" : "ADICIONAR"} style={formStyles.button} />
         </form>
-    );
-
-    const viewModalJSX = viewingAnotacao && (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '15px',
-            color: '#e0e0e0'
-        }}>
-            <p style={{ margin: 0, fontSize: '1em', color: '#c0c0c0' }}>
-                Data: {viewingAnotacao.data}
-            </p>
-        </div>
     );
 
     const createCardActionsGenerator = (anotacao) => (
         <>
-            <Button 
-                icon="pi pi-pencil" 
-                className="p-button-text p-button-sm" 
-                style={{ color: '#ffbc3fff' }} 
-                onClick={(e) => { 
-                    e.stopPropagation(); 
-                    handleOpenModal(anotacao); 
-                }} 
-            />
-            <Button 
-                icon="pi pi-trash" 
-                className="p-button-text p-button-sm" 
-                style={{ color: '#e05a2eff' }} 
-                onClick={(e) => { 
-                    e.stopPropagation(); 
-                    handleDelete(anotacao.id); 
-                }} 
-            />
+            <Button icon="pi pi-pencil" className="p-button-text p-button-sm" style={{ color: '#ffbc3fff' }} onClick={(e) => { e.stopPropagation(); handleOpenModal(anotacao); }} />
+            <Button icon="pi pi-trash" className="p-button-text p-button-sm" style={{ color: '#e05a2eff' }} onClick={(e) => { e.stopPropagation(); confirmDelete(anotacao.id); }} />
         </>
     );
 
     const handleFilterSearch = (e) => {
         setFiltro(e.target.value);
-
-        if(e.target.value.length > 3) {
-            getAnotacoes();
-        }
-    }
+        if (e.target.value.length > 3) getAnotacoes();
+    };
 
     return (
-        <main style={{paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
+        <main style={{ paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
             <Navbar />
-            <Toast ref={toast} position="bottom-right"/>
+            <Toast ref={toast} position="bottom-right" />
+            <ConfirmDialog />
 
             <Header
                 title="Anotações"
@@ -315,7 +237,7 @@ const Anotacao = () => {
                 onSearchChange={(e) => handleFilterSearch(e)}
                 onAddClick={() => handleOpenModal()}
                 searchPlaceholder="Pesquisar por título."
-                addButtonLabel= "Adicionar Anotação"
+                addButtonLabel="Adicionar Anotação"
             />
 
             <section style={{ padding: "0 20px", maxWidth: "1000px", margin: "30px auto" }}>
@@ -327,21 +249,12 @@ const Anotacao = () => {
                 />
             </section>
 
-             <Modal
-                 isOpen={isModalOpen}
-                 onClose={handleCloseModal}
-                 title={editingAnotacao ? "Atualizar - Anotação" : "Adicionar - Anotação"}
-             >
-                 {modalFormJSX}
-             </Modal>
+            <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingAnotacao ? "Atualizar - Anotação" : "Adicionar - Anotação"}>
+                {modalFormJSX}
+            </Modal>
 
-             <Modal
-                 isOpen={isViewModalOpen}
-                 onClose={handleCloseViewModal}
-                 title={viewingAnotacao ? `Visualizar - ${viewingAnotacao.titulo}` : "Visualizar Anotação"}
-             >
-                 {viewModalJSX}
-             </Modal>
+            <Modal isOpen={isViewModalOpen} onClose={handleCloseViewModal} title={viewingAnotacao ? `Visualizar - ${viewingAnotacao.titulo}` : "Visualizar Anotação"}>
+            </Modal>
         </main>
     );
 };

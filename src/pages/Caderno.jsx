@@ -3,6 +3,7 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Tooltip } from 'primereact/tooltip'; 
 import { Toast } from 'primereact/toast';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import Header from "../components/Header";
 import Listagem from "../components/Listagem";
 import Modal from "../components/Modal";
@@ -109,19 +110,30 @@ const Caderno = () => {
         }
     };
 
-    const handleDelete = (id) => {
-        if (window.confirm("Tem certeza que deseja excluir este caderno?")) {
-            apiVestibulizeClient.delete('notebook/' + id, { headers: {
-                token: `${localStorage.getItem('token')}` 
-            }}).then(response => {
-                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno excluído com sucesso!', life: 3000 });
-                getCadernos();
-            }).catch(error => {
-                console.error(error);
-                traitExpiredToken(error.response.data.message);
-                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir caderno. Tente novamente.', life: 3000 });
-            });
-        }
+    const acceptDelete = (id) => {
+        apiVestibulizeClient.delete('notebook/' + id, { headers: {
+            token: `${localStorage.getItem('token')}` 
+        }}).then(response => {
+            toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno excluído com sucesso!', life: 3000 });
+            getCadernos();
+        }).catch(error => {
+            console.error(error);
+            traitExpiredToken(error.response.data.message);
+            toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir caderno. Tente novamente.', life: 3000 });
+        });
+    };
+
+    const confirmDelete = (id) => {
+        confirmDialog({
+            message: 'Tem certeza que deseja excluir este caderno?',
+            header: 'Confirmação de Exclusão',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim, excluir',
+            rejectLabel: 'Cancelar',
+            acceptClassName: 'p-button-success p-button-text',
+            rejectClassName: 'p-button-danger p-button-text',
+            accept: () => acceptDelete(id),
+        });
     };
 
     const formStyles = {
@@ -243,7 +255,7 @@ const Caderno = () => {
                 style={{ color: '#e05a2eff' }} 
                 onClick={(e) => { 
                     e.stopPropagation(); 
-                    handleDelete(caderno.id); 
+                    confirmDelete(caderno.id); 
                 }} 
             />
         </>
@@ -261,6 +273,7 @@ const Caderno = () => {
         <main style={{paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
             <Navbar />
             <Toast ref={toast} position="bottom-right"/>
+            <ConfirmDialog /> 
 
             <Header
                 title="Cadernos"

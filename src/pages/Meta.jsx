@@ -3,12 +3,12 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Tooltip } from 'primereact/tooltip'; 
 import { Toast } from 'primereact/toast';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import Header from "../components/Header";
 import Listagem from "../components/Listagem";
 import Modal from "../components/Modal";
-import { useNavigate, useParams } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom'; 
 import apiVestibulizeClient, { traitExpiredToken } from "../utils/apiVestibulizeClient";
-import InputTextArea from "../components/InputTextArea";
 import Navbar from "../components/Navbar";
 
 const Meta = () => {
@@ -17,7 +17,7 @@ const Meta = () => {
     const toast = useRef(null);
 
     const [filtro, setFiltro] = useState("");
-    const [metas, setMetas] = useState([])
+    const [metas, setMetas] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMeta, setEditingMeta] = useState(null);
     const [titulo, setTitulo] = useState("");
@@ -32,7 +32,6 @@ const Meta = () => {
     }, []);
 
     const getMetas = async () => {
-
         const params = filtro.trim().length > 3 ? { search: filtro.trim() } : {};
 
         const response = await apiVestibulizeClient.get('goal', { 
@@ -41,19 +40,21 @@ const Meta = () => {
             },
             params: params
         }).catch(error => {
-            console.log(error.response.data.message);
-            traitExpiredToken(error.response.data.message);
+            console.log(error.response?.data?.message);
+            traitExpiredToken(error.response?.data?.message);
         });
         
-        setMetas(response.data.map((item) => ({
-            data: item.created_at === null ? null : new Date(item.created_at).toLocaleDateString("pt-BR"),
-            titulo: item.title,
-            descricao: item.description,
-            dataLimite: item.deadline,
-            prioridade: item.priority,
-            id: item.id
-        })))
-    }
+        if (response?.data) {
+            setMetas(response.data.map((item) => ({
+                data: item.created_at ? new Date(item.created_at).toLocaleDateString("pt-BR") : null,
+                titulo: item.title,
+                descricao: item.description,
+                dataLimite: item.deadline,
+                prioridade: item.priority,
+                id: item.id
+            })));
+        }
+    };
 
     const handleOpenModal = (item = null) => {
         setIsViewModalOpen(false);
@@ -77,66 +78,73 @@ const Meta = () => {
     const handleCloseViewModal = () => {
         setIsViewModalOpen(false);
         setViewingMeta(null);
-    }
+    };
 
     const handleSave = async () => {
         if (!titulo.trim()) {
             toast.current?.show({ severity: 'warn', summary: 'Aviso', detail: 'O título é obrigatório!', life: 3000 });
             return;
         }
+
         const dados = {
             id: editingMeta ? editingMeta.id : null,
             title: titulo,
-            // description: descricao,
-            // deadline: dataLimite,
-            // priority: prioridade,
         };
 
         if (editingMeta) {
-            
-            apiVestibulizeClient.put('goal/' + dados.id, dados, { headers: {
-                token: `${localStorage.getItem('token')}` 
-            }}).then(response => {
+            apiVestibulizeClient.put('goal/' + dados.id, dados, { 
+                headers: { token: `${localStorage.getItem('token')}` } 
+            })
+            .then(() => {
                 toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Meta atualizada com sucesso!', life: 3000 });
                 getMetas();
-            }).catch(error => {
+            })
+            .catch(error => {
                 console.error(error);
-                traitExpiredToken(error.response.data.message);
+                traitExpiredToken(error.response?.data?.message);
                 toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar meta. Tente novamente.', life: 3000 });
-            }).finally(() => {
-                handleCloseModal();
-            });
-
+            })
+            .finally(() => handleCloseModal());
         } else {
-
-             apiVestibulizeClient.post('goal', dados, { headers: {
-                token: `${localStorage.getItem('token')}` 
-            }}).then(response => {
+            apiVestibulizeClient.post('goal', dados, { 
+                headers: { token: `${localStorage.getItem('token')}` } 
+            })
+            .then(() => {
                 toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Meta criada com sucesso!', life: 3000 });
                 getMetas();
-            }).catch(error => {
+            })
+            .catch(error => {
                 console.error(error);
-                traitExpiredToken(error.response.data.message);
+                traitExpiredToken(error.response?.data?.message);
                 toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao criar meta. Tente novamente.', life: 3000 });
-            }).finally(() => {
-                handleCloseModal();
-            });
-
+            })
+            .finally(() => handleCloseModal());
         }
     };
 
     const handleDelete = (id) => {
-        if (window.confirm("Tem certeza que deseja excluir esta meta?")) {
-            apiVestibulizeClient.delete('goal/' + id, { headers: {
-                token: `${localStorage.getItem('token')}` 
-            }}).then(response => {
-                toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Meta excluída com sucesso!', life: 3000 });
-                getMetas();
-            }).catch(error => {
-                console.error(error);
-                toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir meta. Tente novamente.', life: 3000 });
-            });
-        }
+        confirmDialog({
+            message: 'Tem certeza que deseja excluir esta meta?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim',
+            rejectLabel: 'Não',
+            acceptClassName: 'p-button-success p-button-text',
+            rejectClassName: 'p-button-danger p-button-text',
+            accept: () => {
+                apiVestibulizeClient.delete('goal/' + id, { 
+                    headers: { token: `${localStorage.getItem('token')}` } 
+                })
+                .then(() => {
+                    toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Meta excluída com sucesso!', life: 3000 });
+                    getMetas();
+                })
+                .catch(error => {
+                    console.error(error);
+                    toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir meta. Tente novamente.', life: 3000 });
+                });
+            }
+        });
     };
 
     const formStyles = {
@@ -168,7 +176,6 @@ const Meta = () => {
         fontSize: '0.7em',
     };
 
-
     const modalFormJSX = (
         <form
             onSubmit={(e) => { e.preventDefault(); handleSave(); }}
@@ -192,65 +199,6 @@ const Meta = () => {
                     autoFocus
                 />
             </div>
-{/* 
-            <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <label htmlFor="descricao" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Descrição</label>
-                    <i id="tooltip-icon-descricao" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-descricao" 
-                        content="Descreva detalhadamente o que você quer alcançar com esta meta." 
-                        position="top" 
-                    />
-                </div>
-                <InputTextArea
-                    id="descricao"
-                    value={descricao}
-                    onChange={(e) => setDescricao(e.target.value)}
-                    style={formStyles.input}
-                    autoFocus
-                />
-            </div> */}
-{/* 
-            <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <label htmlFor="dataLimite" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Data Limite</label>
-                    <i id="tooltip-icon-dataLimite" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-dataLimite" 
-                        content="Defina uma data limite para alcançar esta meta." 
-                        position="top" 
-                    />
-                </div>
-                <InputText
-                    id="dataLimite"
-                    type="date"
-                    value={dataLimite}
-                    onChange={(e) => setDataLimite(e.target.value)}
-                    style={formStyles.input}
-                    autoFocus
-                />
-            </div> */}
-{/* 
-            <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <label htmlFor="prioridade" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Prioridade</label>
-                    <i id="tooltip-icon-prioridade" className="pi pi-info-circle" style={iconStyle} />
-                    <Tooltip 
-                        target="#tooltip-icon-prioridade" 
-                        content="Defina a prioridade desta meta (Alta, Média, Baixa)." 
-                        position="top" 
-                    />
-                </div>
-                <InputText
-                    id="prioridade"
-                    value={prioridade}
-                    onChange={(e) => setPrioridade(e.target.value)}
-                    style={formStyles.input}
-                    placeholder="Ex: Alta, Média, Baixa"
-                    autoFocus
-                />
-            </div> */}
 
             <Button
                 label={editingMeta ? "ATUALIZAR" : "ADICIONAR"}
@@ -312,16 +260,16 @@ const Meta = () => {
 
     const handleFilterSearch = (e) => {
         setFiltro(e.target.value);
-
-        if(e.target.value.length > 3) {
+        if (e.target.value.length > 3) {
             getMetas();
         }
-    }
+    };
 
     return (
         <main style={{paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
             <Navbar />
             <Toast ref={toast} position="bottom-right"/>
+            <ConfirmDialog />
 
             <Header
                 title="Metas"
@@ -341,21 +289,21 @@ const Meta = () => {
                 />
             </section>
 
-             <Modal
-                 isOpen={isModalOpen}
-                 onClose={handleCloseModal}
-                 title={editingMeta ? "Atualizar - Meta" : "Adicionar - Meta"}
-             >
-                 {modalFormJSX}
-             </Modal>
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title={editingMeta ? "Atualizar - Meta" : "Adicionar - Meta"}
+            >
+                {modalFormJSX}
+            </Modal>
 
-             <Modal
-                 isOpen={isViewModalOpen}
-                 onClose={handleCloseViewModal}
-                 title={viewingMeta ? `Visualizar - ${viewingMeta.titulo}` : "Visualizar Meta"}
-             >
-                 {viewModalJSX}
-             </Modal>
+            <Modal
+                isOpen={isViewModalOpen}
+                onClose={handleCloseViewModal}
+                title={viewingMeta ? `Visualizar - ${viewingMeta.titulo}` : "Visualizar Meta"}
+            >
+                {viewModalJSX}
+            </Modal>
 
         </main>
     );
