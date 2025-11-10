@@ -62,7 +62,7 @@ function Login() {
           detail: 'Bem-vindo de volta!',
           life: 2000
         })
-
+        window.location.reload();
         navigate('/')
       } else {
         toast.current.show({

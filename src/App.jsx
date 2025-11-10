@@ -8,6 +8,7 @@ import Meta from "./pages/Meta";
 import Prova from "./pages/Prova";
 import Perfil from "./pages/Perfil";
 import NotFound from "./pages/NotFound";
+import AlterarSenha from "./pages/AlterarSenha";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           {/* <Route path="/login" element={<Login />} /> */}
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+          <Route path="/alterar-senha" element={<AlterarSenha />} />
           <Route path="/metas" element={
             <ProtectedRoute>
               <Meta />
