@@ -14,7 +14,7 @@ export const traitExpiredToken = (responseMessage) => {
         alert("Token expirado. Por favor, faça login novamente.");
         localStorage.removeItem('token');
         localStorage.removeItem('userData');
-        navigate('/login');
+        navigate('/');
     }
 
 }

@@ -13,7 +13,7 @@ export default function ImagemVestibulize() {
 
   return (
     <img
-      onClick={() => (window.location.href = "/login")}
+      onClick={() => (window.location.href = "/")}
       src={isMobile ? logoPequeno : logoGrande}
       alt="Vestibulize"
       style={{

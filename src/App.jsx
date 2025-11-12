@@ -22,7 +22,6 @@ function App() {
             </ProtectedRoute> : 
             <Login />) 
           } />
-          {/* <Route path="/login" element={<Login />} /> */}
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/alterar-senha" element={<AlterarSenha />} />
@@ -54,7 +53,7 @@ function App() {
 
 export const ProtectedRoute = ({ children }) => {
   return (
-    localStorage.getItem('token') && localStorage.getItem('userData') ? children : <Navigate to="/login" replace />
+    localStorage.getItem('token') && localStorage.getItem('userData') ? children : <Navigate to="/" replace />
   );
 };
 

@@ -146,7 +146,8 @@ export default function PerfilHeader() {
     if (savedInteresses)
       localStorage.setItem(`interesses_${formData.nome}`, savedInteresses);
 
-    window.location.href = "/login";
+    window.location.href = "/";
+    window.location.reload();
   };
 
   const toggleInteresse = (nome) => {

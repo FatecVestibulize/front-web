@@ -126,7 +126,7 @@ function AlterarSenha() {
             links={[
               {
                 prefix: "Lembrou sua senha? ",
-                to: "/login",
+                to: "/",
                 label: "Faça login",
                 linkStyle: {},
               },
