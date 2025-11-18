@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ImagemPerfilPadrao from "../assets/imagem-perfil.png";
+import apiVestibulizeClient from "../utils/apiVestibulizeClient";
 
 export default function IconePerfil() {
   const [isHovered, setIsHovered] = useState(false);
@@ -50,15 +51,26 @@ export default function IconePerfil() {
     setIsHovered(false);
     setTimeout(() => {
       if (!isHovered) setShowLogout(false);
-    }, 300); // tempo extra pra permitir mover o cursor pro menu
+    }, 300);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (token) {
+        await apiVestibulizeClient.post("/user/logout", null, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao deslogar:", err);
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("userData");
-    window.location.reload();
     window.location.href = "/";
   };
+
 
   const handleClick = () => {
     if (loggedIn) navigate("/");

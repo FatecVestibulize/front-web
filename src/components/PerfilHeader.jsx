@@ -132,22 +132,31 @@ export default function PerfilHeader() {
     );
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     const savedColor = localStorage.getItem(`avatarColor_${formData.nome}`);
     const savedInteresses = localStorage.getItem(
       `interesses_${formData.nome}`
     );
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("userData");
-
-    if (savedColor)
-      localStorage.setItem(`avatarColor_${formData.nome}`, savedColor);
-    if (savedInteresses)
-      localStorage.setItem(`interesses_${formData.nome}`, savedInteresses);
-
-    window.location.href = "/";
-    window.location.reload();
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        await apiVestibulizeClient.post("/user/logout", null, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao deslogar:", err);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userData");
+      if (savedColor)
+        localStorage.setItem(`avatarColor_${formData.nome}`, savedColor);
+      if (savedInteresses)
+        localStorage.setItem(`interesses_${formData.nome}`, savedInteresses);
+      window.location.href = "/";
+      window.location.reload();
+    }
   };
 
   const toggleInteresse = (nome) => {
