@@ -3,10 +3,10 @@ import { Card as PrimeCard } from "primereact/card";
 import { Button } from "primereact/button";
 
 const CARD_COLORS = {
-  background: "#FFFFFF",
+  background: "#fffefeff",
   border: "rgba(0, 0, 0, 0.1)",
-  shadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-  hoverShadow: "0 6px 18px rgba(0, 0, 0, 0.15)",
+  shadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
+  glow: "0 0 12px rgba(165, 156, 255, 0.45)",
   dataText: "#888888",
 };
 
@@ -15,25 +15,24 @@ const Card = ({ titulo, data, actions, onClick }) => {
 
   const cardStyle = {
     width: "100%",
-    marginBottom: "15px",
-    borderRadius: "12px",
-    border: `1px solid ${CARD_COLORS.border}`,
-    padding: "5px 16px",
-    height: "auto",
-    boxSizing: "border-box",
+    marginBottom: "12px",
+    borderRadius: "14px",
+    border: isHovered ? "1px solid rgba(223, 188, 255, 0.6)" : `1px solid ${CARD_COLORS.border}`,
+    padding: "14px 18px",
     backgroundColor: CARD_COLORS.background,
-    boxShadow: isHovered ? CARD_COLORS.hoverShadow : CARD_COLORS.shadow,
-    transform: isHovered ? "scale(1.01)" : "scale(1)",
-    transition: "transform 0.3s ease-out, box-shadow 0.3s ease-out",
+    boxShadow: isHovered ? CARD_COLORS.glow : CARD_COLORS.shadow,
+    transform: isHovered ? "scale(1.015)" : "scale(1)",
+    transition:
+      "transform 0.25s ease-out, box-shadow 0.25s ease-out, border 0.25s ease-out",
     cursor: "pointer",
   };
 
   const contentContainerStyle = {
     display: "flex",
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
-    minHeight: "30px",
+    gap: "12px",
   };
 
   const textBlockStyle = {
@@ -41,13 +40,12 @@ const Card = ({ titulo, data, actions, onClick }) => {
     flexDirection: "column",
     flex: 1,
     minWidth: 0,
-    marginRight: "20px",
   };
 
   const buttonBlockStyle = {
     display: "flex",
-    flexShrink: 0,
-    gap: "4px",
+    gap: "6px",
+    alignItems: "center",
   };
 
   return (
@@ -55,26 +53,30 @@ const Card = ({ titulo, data, actions, onClick }) => {
       style={cardStyle}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={onClick} 
+      onClick={onClick}
     >
       <div style={contentContainerStyle}>
         <div style={textBlockStyle}>
           <div
             style={{
               fontWeight: "600",
-              marginBottom: "2px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              color: "#333333",
+              marginBottom: "4px",
+              whiteSpace: "normal",
+              wordBreak: "break-word",
+              lineHeight: "1.3",
+              fontSize: "1.05rem",
+              color: "#2b2b2b",
             }}
           >
             {titulo}
           </div>
-          <div style={{
-            fontSize: "0.8em",
-            color: CARD_COLORS.dataText
-          }}>
+
+          <div
+            style={{
+              fontSize: "0.8em",
+              color: CARD_COLORS.dataText,
+            }}
+          >
             {data}
           </div>
         </div>
