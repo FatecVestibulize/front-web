@@ -9,6 +9,9 @@ import Prova from "./pages/Prova";
 import Perfil from "./pages/Perfil";
 import NotFound from "./pages/NotFound";
 import AlterarSenha from "./pages/AlterarSenha";
+import QuizStart from "./pages/QuizStart";
+import Quiz from "./pages/Quiz";
+import QuizFinish from "./pages/QuizFinish";
 
 function App() {
   return (
@@ -45,6 +48,18 @@ function App() {
             <ProtectedRoute>
               <Perfil />
             </ProtectedRoute>} />
+            <Route path="/quiz" element={
+              <ProtectedRoute>
+                <QuizStart />
+              </ProtectedRoute>} />
+            <Route path="/quiz/:quiz_id" element={
+              <ProtectedRoute>
+                <Quiz />
+              </ProtectedRoute>} />
+            <Route path="/quiz/:quiz_id/resumo" element={
+              <ProtectedRoute>
+                <QuizFinish />
+              </ProtectedRoute>} />
         </Routes>
       </div>
     </div>
