@@ -20,6 +20,7 @@ export default function ListaAmigos() {
   const [friendIds, setFriendIds] = useState(new Set());
   const [pendingSent, setPendingSent] = useState(new Set());
   const [pendingReceived, setPendingReceived] = useState([]);
+  const [onlineIds, setOnlineIds] = useState(new Set());
   const [hoveredFriend, setHoveredFriend] = useState(null);
   const [hoveredAccept, setHoveredAccept] = useState(null);
   const [hoveredReject, setHoveredReject] = useState(null);
@@ -33,37 +34,36 @@ export default function ListaAmigos() {
     return cor || "#9B8DC7";
   };
 
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-
-    fetchUsers();
-    fetchFriends();
-    fetchRequests();
-
-    const atualizarCores = () => setAllUsers((prev) => [...prev]);
-    window.addEventListener("avatarColorChanged", atualizarCores);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("avatarColorChanged", atualizarCores);
-    };
-  }, []);
+  const generateInitials = (username) => {
+    if (!username) return "";
+    const partes = username.trim().split(" ");
+    return partes[0].substring(0, 2).toUpperCase();
+  };
 
   const fetchUsers = async () => {
     try {
-      const res = await apiVestibulizeClient.get("/user/all", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const usersWithOnline = res.data.map((u) => ({
+      const [resUsers, resOnline] = await Promise.all([
+        apiVestibulizeClient.get("/user/all", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        apiVestibulizeClient.get("/user/online", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const onlineIds = resOnline.data;
+
+      const usersWithOnline = resUsers.data.map((u) => ({
         ...u,
-        online: Math.random() < 0.7,
+        online: onlineIds.includes(u.id),
       }));
+
       setAllUsers(usersWithOnline);
     } catch (err) {
       console.log("Erro fetchUsers:", err);
     }
   };
+
 
   const fetchFriends = async () => {
     try {
@@ -87,6 +87,21 @@ export default function ListaAmigos() {
     } catch (err) {
       console.log("Erro fetchRequests:", err);
     }
+  };
+
+  const fetchOnlineUsers = async () => {
+    try {
+      const res = await apiVestibulizeClient.get("/user/online", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setOnlineIds(new Set(res.data));
+    } catch (err) {
+      console.log("Erro fetchOnlineUsers:", err);
+    }
+  };
+
+  const fetchAll = async () => {
+    await Promise.all([fetchUsers(), fetchFriends(), fetchRequests(), fetchOnlineUsers()]);
   };
 
   const handleSendRequest = async (id) => {
@@ -139,18 +154,23 @@ export default function ListaAmigos() {
     }
   };
 
-  const generateInitials = (username) => {
-    if (!username) return "";
-    const partes = username.trim().split(" ");
-    return partes[0].substring(0, 2).toUpperCase();
-  };
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+
+    fetchAll();
+
+    const interval = setInterval(fetchAll, 5000);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearInterval(interval);
+    };
+  }, []);
 
   const usersToShow =
     searchQuery.trim() === ""
       ? allUsers.filter((u) => friendIds.has(u.id) || pendingReceived.includes(u.id))
-      : allUsers.filter((u) =>
-          u.username.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+      : allUsers.filter((u) => u.username.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const visiveis = expandido ? usersToShow : usersToShow.slice(0, 3);
   const isMobile = windowWidth < 768;
@@ -167,11 +187,15 @@ export default function ListaAmigos() {
         margin: isMobile ? "10px auto" : "0",
       }}
     >
+      {/* HEADER */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
         <Users size={20} color="#47427C" />
-        <h2 style={{ color: "#47427C", fontSize: "14px", margin: 0, fontWeight: "normal" }}>Amigos</h2>
+        <h2 style={{ color: "#47427C", fontSize: "14px", margin: 0, fontWeight: "normal" }}>
+          Amigos
+        </h2>
       </div>
 
+      {/* SEARCH */}
       <div style={{ position: "relative", marginBottom: "16px" }}>
         <Search
           size={16}
@@ -193,6 +217,7 @@ export default function ListaAmigos() {
         />
       </div>
 
+      {/* LISTA DE USUÁRIOS */}
       <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "16px" }}>
         {visiveis.length === 0 ? (
           <p style={{ textAlign: "center", color: "#9CA3AF", fontSize: "13px" }}>
@@ -203,6 +228,7 @@ export default function ListaAmigos() {
             const isFriend = friendIds.has(user.id);
             const hasSent = pendingSent.has(user.id);
             const hasReceived = pendingReceived.includes(user.id);
+            const isOnline = onlineIds.has(user.id);
             const initials = generateInitials(user.username);
             const color = getAvatarColor(user.username);
 
@@ -225,7 +251,7 @@ export default function ListaAmigos() {
                   >
                     {initials}
                   </div>
-                  {user.online && (
+                  {isOnline && (
                     <div
                       style={{
                         position: "absolute",
@@ -248,70 +274,29 @@ export default function ListaAmigos() {
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     {isFriend ? (
                       <>
-                        <div
-                          style={{
-                            flex: 1,
-                            height: "6px",
-                            backgroundColor: "#E5E7EB",
-                            borderRadius: "6px",
-                            overflow: "hidden",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: `78%`,
-                              height: "100%",
-                              backgroundColor: "#47427C",
-                              borderRadius: "6px",
-                            }}
-                          />
+                        <div style={{ flex: 1, height: "6px", backgroundColor: "#E5E7EB", borderRadius: "6px", overflow: "hidden" }}>
+                          <div style={{ width: `78%`, height: "100%", backgroundColor: "#47427C", borderRadius: "6px" }} />
                         </div>
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            color: "#6B7280",
-                            width: "32px",
-                            textAlign: "right",
-                          }}
-                        >
-                          78%
-                        </span>
+                        <span style={{ fontSize: "11px", color: "#6B7280", width: "32px", textAlign: "right" }}>78%</span>
                       </>
                     ) : (
                       <div style={{ flex: 1 }}>
                         {hasSent ? (
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "#9CA3AF",
-                              fontStyle: "italic",
-                            }}
-                          >
-                            Solicitação enviada
-                          </span>
+                          <span style={{ fontSize: "12px", color: "#9CA3AF", fontStyle: "italic" }}>Solicitação enviada</span>
                         ) : (
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "#6B7280",
-                              wordBreak: "break-all",
-                            }}
-                          >
-                            {user.email}
-                          </span>
+                          <span style={{ fontSize: "12px", color: "#6B7280", wordBreak: "break-all" }}>{user.email}</span>
                         )}
                       </div>
                     )}
                   </div>
                 </div>
 
+                {/* BOTÕES */}
                 {isFriend ? (
                   <div
                     onMouseEnter={() => setHoveredFriend(user.id)}
                     onMouseLeave={() => setHoveredFriend(null)}
-                    onClick={() => {
-                      if (hoveredFriend === user.id) handleRemoveFriend(user.id);
-                    }}
+                    onClick={() => { if (hoveredFriend === user.id) handleRemoveFriend(user.id); }}
                     style={{
                       flexShrink: 0,
                       width: "28px",
@@ -325,31 +310,14 @@ export default function ListaAmigos() {
                       transition: "background-color 0.2s ease",
                     }}
                   >
-                    {hoveredFriend === user.id ? (
-                      <Trash2 size={12} color="#fff" />
-                    ) : (
-                      <Check size={12} color="#fff" />
-                    )}
+                    {hoveredFriend === user.id ? <Trash2 size={12} color="#fff" /> : <Check size={12} color="#fff" />}
                   </div>
                 ) : hasSent ? (
-                  <div
-                    style={{
-                      flexShrink: 0,
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      border: "2px solid #D1D5DB",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#9CA3AF",
-                    }}
-                  >
+                  <div style={{ flexShrink: 0, width: "28px", height: "28px", borderRadius: "50%", border: "2px solid #D1D5DB", display: "flex", alignItems: "center", justifyContent: "center", color: "#9CA3AF" }}>
                     <Clock size={12} />
                   </div>
                 ) : hasReceived ? (
                   <div style={{ display: "flex", gap: "8px" }}>
-                    {/* Botão aceitar */}
                     <button
                       onMouseEnter={() => setHoveredAccept(user.id)}
                       onMouseLeave={() => setHoveredAccept(null)}
@@ -360,8 +328,7 @@ export default function ListaAmigos() {
                         height: "28px",
                         borderRadius: "50%",
                         border: "2px solid #47427C",
-                        backgroundColor:
-                          hoveredAccept === user.id ? "#47427C" : "transparent",
+                        backgroundColor: hoveredAccept === user.id ? "#47427C" : "transparent",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -369,13 +336,8 @@ export default function ListaAmigos() {
                         transition: "all 0.2s ease",
                       }}
                     >
-                      <Handshake
-                        size={12}
-                        color={hoveredAccept === user.id ? "#fff" : "#47427C"}
-                      />
+                      <Handshake size={12} color={hoveredAccept === user.id ? "#fff" : "#47427C"} />
                     </button>
-
-                    {/* Botão rejeitar */}
                     <button
                       onMouseEnter={() => setHoveredReject(user.id)}
                       onMouseLeave={() => setHoveredReject(null)}
@@ -386,8 +348,7 @@ export default function ListaAmigos() {
                         height: "28px",
                         borderRadius: "50%",
                         border: "2px solid #EF4444",
-                        backgroundColor:
-                          hoveredReject === user.id ? "#EF4444" : "transparent",
+                        backgroundColor: hoveredReject === user.id ? "#EF4444" : "transparent",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -395,10 +356,7 @@ export default function ListaAmigos() {
                         transition: "all 0.2s ease",
                       }}
                     >
-                      <X
-                        size={12}
-                        color={hoveredReject === user.id ? "#fff" : "#EF4444"}
-                      />
+                      <X size={12} color={hoveredReject === user.id ? "#fff" : "#EF4444"} />
                     </button>
                   </div>
                 ) : (
@@ -425,6 +383,7 @@ export default function ListaAmigos() {
         )}
       </div>
 
+      {/* BOTÃO VER MAIS */}
       <button
         onClick={() => setExpandido(!expandido)}
         style={{
