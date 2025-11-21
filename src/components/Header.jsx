@@ -14,8 +14,7 @@ const useScreenSize = (breakpoint = 768) => {
   return width <= breakpoint;
 };
 
-
-const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlaceholder, addButtonLabel }) => {
+const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlaceholder, addButtonLabel, customButton }) => {
   
   const isMobile = useScreenSize(768); 
   
@@ -135,6 +134,9 @@ const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlacehold
               style={componentButtonStyle} 
             />
           )}
+        </div>
+        <div>
+          {customButton}
         </div>
       </div>
     </div>

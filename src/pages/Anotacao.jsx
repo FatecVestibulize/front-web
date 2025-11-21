@@ -13,10 +13,8 @@ import { Toast } from 'primereact/toast';
 import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 
 const Anotacao = () => {
-
     const navigate = useNavigate();
     const toast = useRef(null);
-
     const { notebook_id } = useParams();
 
     const [filtro, setFiltro] = useState("");
@@ -27,8 +25,32 @@ const Anotacao = () => {
     const [anotacao, setAnotacao] = useState("");
     const [pergunta, setPergunta] = useState("");
     const [sumario, setSumario] = useState("");
+
+    const [resumoPagina, setResumoPagina] = useState("");
+
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [viewingAnotacao, setViewingAnotacao] = useState(null);
+    const [loadingResumo, setLoadingResumo] = useState(false);
+
+    const AIButton = (
+        <Button
+            type="button"
+            label={loadingResumo ? "Gerando resumo..." : "Gerar resumo com IA"}
+            icon={loadingResumo ? "pi pi-spin pi-spinner" : "pi pi-sparkles"}
+            disabled={loadingResumo}
+            onClick={() => handleGerarResumo()}
+            style={{
+                marginTop: "10px",
+                width: "100%",
+                background: "#6a4cff",
+                border: "none",
+                color: "white",
+                borderRadius: "8px",
+                padding: "15px",
+                fontWeight: "100",
+            }}
+        />
+    );
 
     useEffect(() => {
         getAnotacoes();
@@ -36,22 +58,25 @@ const Anotacao = () => {
 
     const getAnotacoes = async () => {
         const params = filtro.trim().length > 3 ? { search: filtro.trim() } : {};
-        const response = await apiVestibulizeClient.get(`notebook/${notebook_id}/notes`, { 
-            headers: { token: `${localStorage.getItem('token')}` },
-            params: params
-        }).catch(error => {
-            toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao buscar anotações.', life: 3000 });
-        });
+        try {
+            const response = await apiVestibulizeClient.get(`notebook/${notebook_id}/notes`, { 
+                headers: { token: `${localStorage.getItem('token')}` },
+                params: params
+            });
 
-        if (response?.data) {
-            setAnotacoes(response.data.map((item) => ({
-                data: item.created_at === null ? null : new Date(item.created_at).toLocaleDateString("pt-BR"),
-                titulo: item.title,
-                anotacao: item.content,
-                pergunta: item.questions,
-                sumario: item.summary,
-                id: item.id
-            })));
+            if (response?.data) {
+                setAnotacoes(response.data.map((item) => ({
+                    data: item.created_at === null ? null : new Date(item.created_at).toLocaleDateString("pt-BR"),
+                    titulo: item.title,
+                    anotacao: item.content,
+                    pergunta: item.questions,
+                    sumario: item.summary,
+                    id: item.id
+                })));
+            }
+        } catch (error) {
+            console.error("Erro ao buscar anotações:", error);
+            toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao buscar anotações.', life: 3000 });
         }
     };
 
@@ -171,6 +196,42 @@ const Anotacao = () => {
         fontSize: '0.7em',
     };
 
+    const handleGerarResumo = async () => {
+        try {
+            setLoadingResumo(true);
+
+            const resumoGerado = await apiVestibulizeClient.post(
+                `notebook/${notebook_id}/resumir`,
+                { content: anotacao },
+                { headers: { token: `${localStorage.getItem('token')}` } }
+            );
+
+            const textoResumo = resumoGerado?.data || "";
+
+            setSumario(textoResumo);
+
+            setResumoPagina(textoResumo);
+
+            toast.current?.show({
+                severity: "success",
+                summary: "Resumo gerado!",
+                detail: "O resumo foi exibido na tela principal.",
+                life: 3000
+            });
+
+        } catch (err) {
+            console.error("Erro ao gerar resumo:", err);
+            toast.current?.show({
+                severity: "error",
+                summary: "Erro",
+                detail: "Não foi possível gerar o resumo.",
+                life: 3000
+            });
+        } finally {
+            setLoadingResumo(false);
+        }
+    };
+
     const modalFormJSX = (
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ marginBottom: '20px' }}>
@@ -225,6 +286,7 @@ const Anotacao = () => {
         if (e.target.value.length > 3) getAnotacoes();
     };
 
+
     return (
         <main style={{ paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
             <Navbar />
@@ -238,7 +300,68 @@ const Anotacao = () => {
                 onAddClick={() => handleOpenModal()}
                 searchPlaceholder="Pesquisar por título."
                 addButtonLabel="Adicionar Anotação"
+                customButton={AIButton}
             />
+
+            {resumoPagina && (
+            <section
+                style={{
+                    maxWidth: "1000px",
+                    margin: "25px auto",
+                    padding: "0 20px"
+                }}
+            >
+            <div
+                style={{
+                    width: "100%",
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    boxShadow: "0px 4px 14px rgba(0,0,0,0.15)",
+                    fontFamily: "inherit",
+                    background: "white"
+                }}
+        >
+            <div
+                style={{
+                    background: "#6A4CFF",
+                    color: "white",
+                    padding: "18px 22px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    fontSize: "1.2rem",
+                    fontWeight: "600",
+                    fontFamily: "inherit"
+                }}
+            >
+                <span style={{ fontSize: "1.4rem"}}> <i className="pi pi-sparkles"/></span>
+                <span>Resumo Gerado pela IA</span>
+            </div>
+
+            <div style={{ padding: "18px 22px", background: "white" }}>
+                <textarea
+                    readOnly
+                    value={resumoPagina}
+                    style={{
+                        width: "100%",
+                        minHeight: "140px",
+                        resize: "vertical",
+                        borderRadius: "10px",
+                        border: "1px solid #E0E0E0",
+                        padding: "14px 16px",
+                        outline: "none",
+                        background: "#FAFAFA",
+                        color: "#333",
+                        fontFamily: "inherit",
+                        fontSize: "0.95rem",
+                        lineHeight: "1.48",
+                    }}
+                />
+            </div>
+        </div>
+    </section>
+)}
+
 
             <section style={{ padding: "0 20px", maxWidth: "1000px", margin: "30px auto" }}>
                 <Listagem
@@ -260,3 +383,4 @@ const Anotacao = () => {
 };
 
 export default Anotacao;
+
