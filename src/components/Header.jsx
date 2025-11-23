@@ -81,11 +81,11 @@ const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlacehold
       {backButton && (
         <div style={{
           textAlign: "left",
-          width: "100%",
           marginLeft: "25px",
           backgroundColor: "rgb(74, 76, 120)",
           borderRadius: "50%",
           width: "fit-content",
+          position: "absolute",
         }}
         onClick={() => navigate(-1)}
         >
