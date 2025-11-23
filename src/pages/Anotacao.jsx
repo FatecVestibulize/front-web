@@ -301,6 +301,7 @@ const Anotacao = () => {
                 searchPlaceholder="Pesquisar por título."
                 addButtonLabel="Adicionar Anotação"
                 customButton={AIButton}
+                backButton={true}
             />
 
             {resumoPagina && (

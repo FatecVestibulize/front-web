@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import InputText from "./InputText";
 import Button from "./Button";
+import { ChevronLeft } from "lucide-react"; // importei Brain
+import { useNavigate, useParams } from "react-router-dom";
 
 const useScreenSize = (breakpoint = 768) => {
   const [width, setWidth] = useState(window.innerWidth);
@@ -14,10 +16,10 @@ const useScreenSize = (breakpoint = 768) => {
   return width <= breakpoint;
 };
 
-const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlaceholder, addButtonLabel, customButton }) => {
+const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlaceholder, addButtonLabel, customButton, backButton = false }) => {
   
   const isMobile = useScreenSize(768); 
-  
+  const navigate = useNavigate();
   const buttonLabel = addButtonLabel || "Adicionar Anotação";
   const inputPlaceholder = isMobile ? "Pesquisar..." : (searchPlaceholder || "Pesquisar por título...");
 
@@ -76,6 +78,20 @@ const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlacehold
         zIndex: 100,
       }}
     >
+      {backButton && (
+        <div style={{
+          textAlign: "left",
+          width: "100%",
+          marginLeft: "25px",
+          backgroundColor: "rgb(74, 76, 120)",
+          borderRadius: "50%",
+          width: "fit-content",
+        }}
+        onClick={() => navigate(-1)}
+        >
+          <ChevronLeft style={{fontSize: "20px", color: "white", width: "50px", height: "50px", padding: "5px"}} />
+        </div>
+      )}
       <h1
         style={{
           fontFamily: "'Inter', sans-serif",
