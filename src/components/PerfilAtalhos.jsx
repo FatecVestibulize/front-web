@@ -73,7 +73,7 @@ export default function PerfilAtalhos() {
       info: `${resumo.quizzes} disponíveis`,
       cor: "#F4BB3C",
       icone: <Brain size={24} color="#fff" />, 
-      rota: "/anotacoes",
+      rota: "/quiz",
     },
     {
       titulo: "Minhas Metas",
