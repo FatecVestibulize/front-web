@@ -14,6 +14,12 @@ const useScreenSize = (breakpoint = 768) => {
   return width <= breakpoint;
 };
 
+const CARD_COLORS = {
+  background: "#e9e9e9ff",
+  border: "rgba(0, 0, 0, 0.1)",
+  shadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
+  glow: "0 0 12px rgba(165, 156, 255, 0.35)",
+};
 
 const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlaceholder, addButtonLabel }) => {
   const isMobile = useScreenSize(768);
@@ -62,14 +68,12 @@ const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlacehold
   return (
     <div
       style={{
-        backgroundColor: "#958EC2",
+        backgroundColor: "#7e82bdff",
         padding: "30px 0",
         width: "100vw",
-        margin: 0,
-        boxSizing: "border-box",
         textAlign: "center",
         position: "relative",
-        boxShadow: "0 4px 6px -2px rgba(0, 0, 0, 0.2)",
+        boxShadow: "0 3px 8px rgba(0, 0, 0, 0.15)",
         zIndex: 100,
       }}
     >
@@ -104,8 +108,8 @@ const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlacehold
           alignItems: "center",
           maxWidth: "1100px",
           margin: "0 auto",
-          padding: isMobile ? "0 20px" : "0 60px", 
-          gap: isMobile ? "10px" : "20px", 
+          padding: isMobile ? "0 20px" : "0 60px",
+          gap: isMobile ? "10px" : "20px",
         }}
       >
         <div style={inputContainerStyle}>
