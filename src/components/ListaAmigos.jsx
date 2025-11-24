@@ -152,17 +152,15 @@ export default function ListaAmigos() {
   };
 
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
+  const handleResize = () => setWindowWidth(window.innerWidth);
+  window.addEventListener("resize", handleResize);
 
-    fetchAll();
+  fetchAll(); 
 
-    const interval = setInterval(fetchAll, 5000);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      clearInterval(interval);
-    };
-  }, []);
+  return () => {
+    window.removeEventListener("resize", handleResize);
+  };
+}, []);
 
   const usersToShow =
     searchQuery.trim() === ""
