@@ -68,6 +68,7 @@ export default function PerfilHeader() {
       ...prev,
       nome: localUserData.username || "",
       email: localUserData.email || "",
+      interesses: localUserData.interesses || "",
     }));
 
     if (!token) {
@@ -88,6 +89,7 @@ export default function PerfilHeader() {
           ...prev,
           nome: user.username || localUserData.username || "",
           email: user.email || localUserData.email || "",
+          interesses: user.interest || localUserData.interesses || "",
         }));
 
         if (user.avatarColor && user.avatarColor.trim() !== "") {
@@ -115,6 +117,7 @@ export default function PerfilHeader() {
       const payload = {
         username: formData.nome,
         interesses: formData.interesses,
+        interest: formData.interesses,
         password: formData.senha || undefined,
         avatarColor: bgColor, //novo: persistir a cor no backend
       };
@@ -134,6 +137,7 @@ export default function PerfilHeader() {
         JSON.stringify({
           username: returned.username || formData.nome,
           email: returned.email || formData.email,
+          interesses: formData.interesses,
         })
       );
 
@@ -141,6 +145,7 @@ export default function PerfilHeader() {
         ...prev,
         nome: returned.username || formData.nome,
         email: returned.email || formData.email,
+        interesses: returned.interest || formData.interesses,
       }));
 
       if (returned.avatarColor) {
