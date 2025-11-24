@@ -194,6 +194,7 @@ const Anotacao = () => {
             <div style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                     <label htmlFor="pergunta" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Perguntas</label>
+                    <label htmlFor="pergunta" style={{ fontSize: '0.9em', color: '#c0c0c0' }}>Palavras-chave</label>
                     <i id="tooltip-icon-pergunta" className="pi pi-info-circle" style={iconStyle} />
                     <Tooltip target="#tooltip-icon-pergunta" content="Seção para revisão destinada a palavras-chave para lembrar do conteúdo." position="top" />
                 </div>

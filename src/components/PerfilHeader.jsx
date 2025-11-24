@@ -26,6 +26,9 @@ export default function PerfilHeader() {
     senha: "",
   });
   const [bgColor, setBgColor] = useState("#47427C");
+
+  const [bgColor, setBgColor] = useState("#47427C"); //novo
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [hoverLogout, setHoverLogout] = useState(false);
 
@@ -59,30 +62,46 @@ export default function PerfilHeader() {
   }, []);
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    const interessesSalvos =
-      localStorage.getItem(`interesses_${userData.username}`) ||
-      userData.interesses ||
-      "";
+    const token = localStorage.getItem("token");
+    const localUserData = JSON.parse(localStorage.getItem("userData") || "{}");
+    setFormData((prev) => ({
+      ...prev,
+      nome: localUserData.username || "",
+      email: localUserData.email || "",
+    }));
 
-    setFormData({
-      nome: userData.username || "",
-      email: userData.email || "",
-      interesses: interessesSalvos,
-      senha: "",
-    });
-
-    if (userData.username) {
-      const username = userData.username;
-      let savedColor = localStorage.getItem(`avatarColor_${username}`);
-      if (!savedColor) {
-        savedColor =
-          avatarColors[Math.floor(Math.random() * avatarColors.length)];
-        localStorage.setItem(`avatarColor_${username}`, savedColor);
-      }
-      setBgColor(savedColor);
+    if (!token) {
+      const random = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+      setBgColor(random); // gerar aleatório se nada mais
+      return;
     }
-  }, []);
+
+    (async () => {
+      try {
+        const res = await apiVestibulizeClient.get("/user/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const user = res.data || {};
+
+        setFormData((prev) => ({
+          ...prev,
+          nome: user.username || localUserData.username || "",
+          email: user.email || localUserData.email || "",
+        }));
+
+        if (user.avatarColor && user.avatarColor.trim() !== "") {
+          setBgColor(user.avatarColor);
+        } else {
+          const random = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+          setBgColor(random);
+        }
+      } catch (err) {
+        const random = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+        setBgColor(random);
+      }
+    })();
+  }, []); // só na montagem
 
   const initials = formData.nome
     ? formData.nome.split(" ")[0].substring(0, 2).toUpperCase()
@@ -91,33 +110,47 @@ export default function PerfilHeader() {
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
+      if (!token) throw new Error("Usuário não autenticado");
+
       const payload = {
         username: formData.nome,
         interesses: formData.interesses,
         password: formData.senha || undefined,
+        avatarColor: bgColor, //novo: persistir a cor no backend
       };
 
       const response = await apiVestibulizeClient.put("/user/update", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      const returned = response.data || {};
+
+      if (returned.token) {
+        localStorage.setItem("token", returned.token);
+      }
+
       localStorage.setItem(
         "userData",
         JSON.stringify({
-          username: response.data.username,
-          email: response.data.email,
-          interesses: response.data.interesses,
+          username: returned.username || formData.nome,
+          email: returned.email || formData.email,
         })
       );
 
-      localStorage.setItem(
-        `interesses_${response.data.username}`,
-        formData.interesses
-      );
+      setFormData((prev) => ({
+        ...prev,
+        nome: returned.username || formData.nome,
+        email: returned.email || formData.email,
+      }));
+
+      if (returned.avatarColor) {
+        setBgColor(returned.avatarColor);
+      }
 
       alert("Perfil atualizado com sucesso!");
+      window.dispatchEvent(new Event("profileUpdated"));
       setIsEditing(false);
-      setFormData({ ...formData, senha: "" });
+      setFormData((prev) => ({ ...prev, senha: "" }));
     } catch (error) {
       console.error(error);
       alert("Erro ao atualizar perfil. Tente novamente.");
@@ -126,18 +159,9 @@ export default function PerfilHeader() {
 
   const handleColorChange = (color) => {
     setBgColor(color);
-    localStorage.setItem(`avatarColor_${formData.nome}`, color);
-    window.dispatchEvent(
-      new CustomEvent("avatarColorChanged", { detail: { newColor: color } })
-    );
   };
 
   const handleLogout = async () => {
-    const savedColor = localStorage.getItem(`avatarColor_${formData.nome}`);
-    const savedInteresses = localStorage.getItem(
-      `interesses_${formData.nome}`
-    );
-
     try {
       const token = localStorage.getItem("token");
       if (token) {
@@ -150,10 +174,6 @@ export default function PerfilHeader() {
     } finally {
       localStorage.removeItem("token");
       localStorage.removeItem("userData");
-      if (savedColor)
-        localStorage.setItem(`avatarColor_${formData.nome}`, savedColor);
-      if (savedInteresses)
-        localStorage.setItem(`interesses_${formData.nome}`, savedInteresses);
       window.location.href = "/";
       window.location.reload();
     }
@@ -488,6 +508,9 @@ export default function PerfilHeader() {
                 ></div>
               ))}
             </div>
+            <p style={{ fontSize: "12px", color: "#6B7280", marginTop: "8px" }}>
+              A cor será salva no seu perfil quando você clicar em <b>Salvar</b>.
+            </p>
           </div>
 
           {/* Senha */}

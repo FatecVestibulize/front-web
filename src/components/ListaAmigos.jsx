@@ -28,10 +28,8 @@ export default function ListaAmigos() {
 
   const token = localStorage.getItem("token");
 
-  const getAvatarColor = (nome) => {
-    if (!nome) return "#ccc";
-    const cor = localStorage.getItem(`avatarColor_${nome}`);
-    return cor || "#9B8DC7";
+  const getAvatarColor = (user) => {
+    return user.avatarColor || "#9B8DC7";
   };
 
   const generateInitials = (username) => {
@@ -63,7 +61,6 @@ export default function ListaAmigos() {
       console.log("Erro fetchUsers:", err);
     }
   };
-
 
   const fetchFriends = async () => {
     try {
@@ -217,7 +214,7 @@ export default function ListaAmigos() {
         />
       </div>
 
-      {/* LISTA DE USUÁRIOS */}
+      {/* LISTA */}
       <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "16px" }}>
         {visiveis.length === 0 ? (
           <p style={{ textAlign: "center", color: "#9CA3AF", fontSize: "13px" }}>
@@ -230,7 +227,7 @@ export default function ListaAmigos() {
             const hasReceived = pendingReceived.includes(user.id);
             const isOnline = onlineIds.has(user.id);
             const initials = generateInitials(user.username);
-            const color = getAvatarColor(user.username);
+            const color = getAvatarColor(user); 
 
             return (
               <div key={user.id} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -274,17 +271,57 @@ export default function ListaAmigos() {
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     {isFriend ? (
                       <>
-                        <div style={{ flex: 1, height: "6px", backgroundColor: "#E5E7EB", borderRadius: "6px", overflow: "hidden" }}>
-                          <div style={{ width: `78%`, height: "100%", backgroundColor: "#47427C", borderRadius: "6px" }} />
+                        <div
+                          style={{
+                            flex: 1,
+                            height: "6px",
+                            backgroundColor: "#E5E7EB",
+                            borderRadius: "6px",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: `78%`,
+                              height: "100%",
+                              backgroundColor: "#47427C",
+                              borderRadius: "6px",
+                            }}
+                          />
                         </div>
-                        <span style={{ fontSize: "11px", color: "#6B7280", width: "32px", textAlign: "right" }}>78%</span>
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            color: "#6B7280",
+                            width: "32px",
+                            textAlign: "right",
+                          }}
+                        >
+                          78%
+                        </span>
                       </>
                     ) : (
                       <div style={{ flex: 1 }}>
                         {hasSent ? (
-                          <span style={{ fontSize: "12px", color: "#9CA3AF", fontStyle: "italic" }}>Solicitação enviada</span>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "#9CA3AF",
+                              fontStyle: "italic",
+                            }}
+                          >
+                            Solicitação enviada
+                          </span>
                         ) : (
-                          <span style={{ fontSize: "12px", color: "#6B7280", wordBreak: "break-all" }}>{user.email}</span>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "#6B7280",
+                              wordBreak: "break-all",
+                            }}
+                          >
+                            {user.email}
+                          </span>
                         )}
                       </div>
                     )}
@@ -296,13 +333,16 @@ export default function ListaAmigos() {
                   <div
                     onMouseEnter={() => setHoveredFriend(user.id)}
                     onMouseLeave={() => setHoveredFriend(null)}
-                    onClick={() => { if (hoveredFriend === user.id) handleRemoveFriend(user.id); }}
+                    onClick={() => {
+                      if (hoveredFriend === user.id) handleRemoveFriend(user.id);
+                    }}
                     style={{
                       flexShrink: 0,
                       width: "28px",
                       height: "28px",
                       borderRadius: "50%",
-                      backgroundColor: hoveredFriend === user.id ? "#EF4444" : "#47427C",
+                      backgroundColor:
+                        hoveredFriend === user.id ? "#EF4444" : "#47427C",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -310,10 +350,26 @@ export default function ListaAmigos() {
                       transition: "background-color 0.2s ease",
                     }}
                   >
-                    {hoveredFriend === user.id ? <Trash2 size={12} color="#fff" /> : <Check size={12} color="#fff" />}
+                    {hoveredFriend === user.id ? (
+                      <Trash2 size={12} color="#fff" />
+                    ) : (
+                      <Check size={12} color="#fff" />
+                    )}
                   </div>
                 ) : hasSent ? (
-                  <div style={{ flexShrink: 0, width: "28px", height: "28px", borderRadius: "50%", border: "2px solid #D1D5DB", display: "flex", alignItems: "center", justifyContent: "center", color: "#9CA3AF" }}>
+                  <div
+                    style={{
+                      flexShrink: 0,
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      border: "2px solid #D1D5DB",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#9CA3AF",
+                    }}
+                  >
                     <Clock size={12} />
                   </div>
                 ) : hasReceived ? (
@@ -328,7 +384,8 @@ export default function ListaAmigos() {
                         height: "28px",
                         borderRadius: "50%",
                         border: "2px solid #47427C",
-                        backgroundColor: hoveredAccept === user.id ? "#47427C" : "transparent",
+                        backgroundColor:
+                          hoveredAccept === user.id ? "#47427C" : "transparent",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -336,7 +393,12 @@ export default function ListaAmigos() {
                         transition: "all 0.2s ease",
                       }}
                     >
-                      <Handshake size={12} color={hoveredAccept === user.id ? "#fff" : "#47427C"} />
+                      <Handshake
+                        size={12}
+                        color={
+                          hoveredAccept === user.id ? "#fff" : "#47427C"
+                        }
+                      />
                     </button>
                     <button
                       onMouseEnter={() => setHoveredReject(user.id)}
@@ -348,7 +410,8 @@ export default function ListaAmigos() {
                         height: "28px",
                         borderRadius: "50%",
                         border: "2px solid #EF4444",
-                        backgroundColor: hoveredReject === user.id ? "#EF4444" : "transparent",
+                        backgroundColor:
+                          hoveredReject === user.id ? "#EF4444" : "transparent",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -356,7 +419,12 @@ export default function ListaAmigos() {
                         transition: "all 0.2s ease",
                       }}
                     >
-                      <X size={12} color={hoveredReject === user.id ? "#fff" : "#EF4444"} />
+                      <X
+                        size={12}
+                        color={
+                          hoveredReject === user.id ? "#fff" : "#EF4444"
+                        }
+                      />
                     </button>
                   </div>
                 ) : (
