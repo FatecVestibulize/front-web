@@ -18,6 +18,7 @@ const Meta = () => {
 
     const [filtro, setFiltro] = useState("");
     const [metas, setMetas] = useState([]);
+    const [metasOriginais, setMetasOriginais] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMeta, setEditingMeta] = useState(null);
     const [titulo, setTitulo] = useState("");
@@ -33,26 +34,41 @@ const Meta = () => {
 
     const getMetas = async () => {
         const params = filtro.trim().length > 3 ? { search: filtro.trim() } : {};
+    useEffect(() => {
+        const termo = filtro.toLowerCase().trim();
 
+        if (termo === "") {
+            setMetas(metasOriginais);
+        } else {
+            const filtrados = metasOriginais.filter(item =>
+                item.titulo && item.titulo.toLowerCase().includes(termo)
+            );
+            setMetas(filtrados);
+        }
+    }, [filtro, metasOriginais]);
+
+    const getMetas = async () => {
         const response = await apiVestibulizeClient.get('goal', { 
             headers: {
                 token: `${localStorage.getItem('token')}` 
-            },
-            params: params
+            }
         }).catch(error => {
             console.log(error.response?.data?.message);
             traitExpiredToken(error.response?.data?.message);
         });
         
         if (response?.data) {
-            setMetas(response.data.map((item) => ({
+            const dadosFormatados = response.data.map((item) => ({
                 data: item.created_at ? new Date(item.created_at).toLocaleDateString("pt-BR") : null,
                 titulo: item.title,
                 descricao: item.description,
                 dataLimite: item.deadline,
                 prioridade: item.priority,
                 id: item.id
-            })));
+            }));
+
+            setMetas(dadosFormatados);
+            setMetasOriginais(dadosFormatados); // Salva o backup
         }
     };
 
@@ -260,9 +276,6 @@ const Meta = () => {
 
     const handleFilterSearch = (e) => {
         setFiltro(e.target.value);
-        if (e.target.value.length > 3) {
-            getMetas();
-        }
     };
 
     return (

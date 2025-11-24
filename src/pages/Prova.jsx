@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { Tooltip } from "primereact/tooltip";
 import { Toast } from "primereact/toast";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import Header from "../components/Header";
@@ -18,6 +17,7 @@ const Prova = () => {
 
     const [filtro, setFiltro] = useState("");
     const [provas, setProvas] = useState([]);
+    const [provasOriginais, setProvasOriginais] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProva, setEditingProva] = useState(null);
     const [titulo, setTitulo] = useState("");
@@ -32,28 +32,41 @@ const Prova = () => {
 
     const getProvas = async () => {
         const params = filtro.trim().length > 3 ? { search: filtro.trim() } : {};
+    useEffect(() => {
+        const termo = filtro.toLowerCase().trim();
 
+        if (termo === "") {
+            setProvas(provasOriginais);
+        } else {
+            const filtrados = provasOriginais.filter((item) => 
+                item.titulo && item.titulo.toLowerCase().includes(termo)
+            );
+            setProvas(filtrados);
+        }
+    }, [filtro, provasOriginais]);
+
+    const getProvas = async () => {
         const response = await apiVestibulizeClient
             .get("exam", {
                 headers: {
                     token: `${localStorage.getItem("token")}`,
-                },
-                params: params,
+                }
             })
             .catch((error) => {
-                console.log(error.response.data.message);
-                traitExpiredToken(error.response.data.message);
+                console.log(error.response?.data?.message);
+                traitExpiredToken(error.response?.data?.message);
             });
 
         if (response?.data) {
-            setProvas(
-                response.data.map((item) => ({
-                    data: item.date ? new Date(item.date).toLocaleDateString("pt-BR") : null,
-                    titulo: item.name,
-                    descricao: item.description,
-                    id: item.id,
-                }))
-            );
+            const dadosFormatados = response.data.map((item) => ({
+                data: item.date ? new Date(item.date).toLocaleDateString("pt-BR") : null,
+                titulo: item.name,
+                descricao: item.description,
+                id: item.id,
+            }));
+
+            setProvas(dadosFormatados);
+            setProvasOriginais(dadosFormatados); // Salva o backup
         }
     };
 
@@ -119,7 +132,7 @@ const Prova = () => {
             })
             .catch((error) => {
                 console.error(error);
-                traitExpiredToken(error.response.data.message);
+                traitExpiredToken(error.response?.data?.message);
                 toast.current?.show({
                     severity: "error",
                     summary: "Erro",
@@ -150,7 +163,7 @@ const Prova = () => {
             })
             .catch((error) => {
                 console.error(error);
-                traitExpiredToken(error.response.data.message);
+                traitExpiredToken(error.response?.data?.message);
                 toast.current?.show({
                     severity: "error",
                     summary: "Erro",
@@ -269,7 +282,6 @@ const Prova = () => {
 
     const handleFilterSearch = (e) => {
         setFiltro(e.target.value);
-        if (e.target.value.length > 3) getProvas();
     };
 
     return (
@@ -389,7 +401,7 @@ const Prova = () => {
                         ? `Visualizar - ${viewingProva.titulo}`
                         : "Visualizar Prova"
                 }
-            ></Modal>
+            </Modal>
         </main>
     );
 };

@@ -17,7 +17,8 @@ const Caderno = () => {
     const toast = useRef(null);
 
     const [filtro, setFiltro] = useState("");
-    const [cadernos, setCadernos] = useState([])
+    const [cadernos, setCadernos] = useState([]);
+    const [cadernosOriginais, setCadernosOriginais] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCaderno, setEditingCaderno] = useState(null);
     const [titulo, setTitulo] = useState("");
@@ -29,24 +30,42 @@ const Caderno = () => {
         getCadernos();
     }, []);
 
-    const getCadernos = async () => {
-        const params = filtro.trim().length > 3 ? { search: filtro.trim() } : {};
+    useEffect(() => {
+        const termo = filtro.toLowerCase().trim();
 
+        if (termo === "") {
+            setCadernos(cadernosOriginais);
+        } else {
+            const filtrados = cadernosOriginais.filter((item) => 
+                item.titulo.toLowerCase().includes(termo)
+            );
+            setCadernos(filtrados);
+        }
+    }, [filtro, cadernosOriginais]);
+
+    const getCadernos = async () => {
         const response = await apiVestibulizeClient.get('notebook', { 
             headers: {
                 token: `${localStorage.getItem('token')}` 
-            },
-            params: params
+            }
         }).catch(error => {
-            console.log(error.response.data.message);
-            traitExpiredToken(error.response.data.message);
+            console.log(error.response?.data?.message);
+            if (error.response?.data?.message) {
+                traitExpiredToken(error.response.data.message);
+            }
         });
         
-        setCadernos(response.data.map((item) => ({
-            data: item.created_at === null ? null : new Date(item.created_at).toLocaleDateString("pt-BR"),
-            titulo: item.title,
-            id: item.id
-        })))
+        if (response && response.data) {
+            const dadosFormatados = response.data.map((item) => ({
+                data: item.created_at === null ? null : new Date(item.created_at).toLocaleDateString("pt-BR"),
+                titulo: item.title,
+                descricao: item.description, 
+                id: item.id
+            }));
+
+            setCadernosOriginais(dadosFormatados);
+           
+        }
     }
 
     const handleOpenModal = (item = null) => {
@@ -115,7 +134,7 @@ const Caderno = () => {
             token: `${localStorage.getItem('token')}` 
         }}).then(response => {
             toast.current?.show({ severity: 'success', summary: 'Sucesso', detail: 'Caderno excluído com sucesso!', life: 3000 });
-            getCadernos();
+            getCadernos(); 
         }).catch(error => {
             console.error(error);
             traitExpiredToken(error.response.data.message);
@@ -263,11 +282,7 @@ const Caderno = () => {
 
     const handleFilterSearch = (e) => {
         setFiltro(e.target.value);
-
-        if(e.target.value.length > 3) {
-            getCadernos();
-        }
-    }
+    };
 
     return (
         <main style={{paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
@@ -343,7 +358,7 @@ const Caderno = () => {
                 searchText={filtro}
                 onSearchChange={(e) => handleFilterSearch(e)}
                 onAddClick={() => handleOpenModal()}
-                searchPlaceholder="Pesquisar por título."
+                searchPlaceholder="Pesquisar por título..."
                 addButtonLabel="Adicionar Caderno"
             />
 

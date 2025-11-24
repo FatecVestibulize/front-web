@@ -21,6 +21,7 @@ const Anotacao = () => {
 
     const [filtro, setFiltro] = useState("");
     const [anotacoes, setAnotacoes] = useState([]);
+    const [anotacoesOriginais, setAnotacoesOriginais] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAnotacao, setEditingAnotacao] = useState(null);
     const [titulo, setTitulo] = useState("");
@@ -34,24 +35,38 @@ const Anotacao = () => {
         getAnotacoes();
     }, []);
 
+    useEffect(() => {
+        const termo = filtro.toLowerCase().trim();
+
+        if (termo === "") {
+            setAnotacoes(anotacoesOriginais);
+        } else {
+            const filtrados = anotacoesOriginais.filter(item =>
+                item.titulo && item.titulo.toLowerCase().includes(termo)
+            );
+            setAnotacoes(filtrados);
+        }
+    }, [filtro, anotacoesOriginais]);
+
     const getAnotacoes = async () => {
-        const params = filtro.trim().length > 3 ? { search: filtro.trim() } : {};
         const response = await apiVestibulizeClient.get(`notebook/${notebook_id}/notes`, { 
-            headers: { token: `${localStorage.getItem('token')}` },
-            params: params
+            headers: { token: `${localStorage.getItem('token')}` }
         }).catch(error => {
             toast.current?.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao buscar anotações.', life: 3000 });
         });
 
         if (response?.data) {
-            setAnotacoes(response.data.map((item) => ({
+            const dadosFormatados = response.data.map((item) => ({
                 data: item.created_at === null ? null : new Date(item.created_at).toLocaleDateString("pt-BR"),
                 titulo: item.title,
                 anotacao: item.content,
                 pergunta: item.questions,
                 sumario: item.summary,
                 id: item.id
-            })));
+            }));
+
+            setAnotacoes(dadosFormatados);
+            setAnotacoesOriginais(dadosFormatados); // Salva o backup
         }
     };
 
@@ -222,7 +237,6 @@ const Anotacao = () => {
 
     const handleFilterSearch = (e) => {
         setFiltro(e.target.value);
-        if (e.target.value.length > 3) getAnotacoes();
     };
 
     return (
@@ -315,9 +329,6 @@ const Anotacao = () => {
 
             <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingAnotacao ? "Atualizar - Anotação" : "Adicionar - Anotação"}>
                 {modalFormJSX}
-            </Modal>
-
-            <Modal isOpen={isViewModalOpen} onClose={handleCloseViewModal} title={viewingAnotacao ? `Visualizar - ${viewingAnotacao.titulo}` : "Visualizar Anotação"}>
             </Modal>
         </main>
     );
