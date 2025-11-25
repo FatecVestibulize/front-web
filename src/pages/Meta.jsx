@@ -17,8 +17,12 @@ const Meta = () => {
     const toast = useRef(null);
 
     const [filtro, setFiltro] = useState("");
+    
+    // Lista exibida na tela (filtrada)
     const [metas, setMetas] = useState([]);
+    // Lista completa (backup dos dados da API)
     const [metasOriginais, setMetasOriginais] = useState([]);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMeta, setEditingMeta] = useState(null);
     const [titulo, setTitulo] = useState("");
@@ -28,12 +32,12 @@ const Meta = () => {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [viewingMeta, setViewingMeta] = useState(null);
 
+    // 1. Carrega os dados iniciais apenas uma vez
     useEffect(() => {
         getMetas();
     }, []);
 
-    const getMetas = async () => {
-        const params = filtro.trim().length > 3 ? { search: filtro.trim() } : {};
+    // 2. Filtro inteligente no Frontend
     useEffect(() => {
         const termo = filtro.toLowerCase().trim();
 
@@ -48,6 +52,7 @@ const Meta = () => {
     }, [filtro, metasOriginais]);
 
     const getMetas = async () => {
+        // Removemos o params de busca para trazer tudo
         const response = await apiVestibulizeClient.get('goal', { 
             headers: {
                 token: `${localStorage.getItem('token')}` 
