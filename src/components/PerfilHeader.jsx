@@ -32,6 +32,7 @@ export default function PerfilHeader() {
   const [bgColor, setBgColor] = useState("#47427C");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [hoverLogout, setHoverLogout] = useState(false);
+  const [loginStreak, setLoginStreak] = useState(0);
 
   const materias = [
     { nome: "Português", cor: "#F43F5E", icone: <BookOpen size={14} /> },
@@ -75,9 +76,12 @@ export default function PerfilHeader() {
       interesses: interessesSalvos,
       senha: "",
       avatar: userData.avatar_url || null,
+      loginStreak: userData.loginStreak || 0,
     });
 
     setAvatar(userData.avatar_url);
+
+    setLoginStreak(userData.loginStreak);
 
     if (userData.username) {
       const username = userData.username;
@@ -447,7 +451,7 @@ export default function PerfilHeader() {
               }}
             >
               <Flame size={14} />
-              Sequência: 7 dias
+              Sequência: {loginStreak || 0} dias
             </div>
             <div
               style={{
