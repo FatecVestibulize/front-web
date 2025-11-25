@@ -25,9 +25,8 @@ export default function PerfilHeader() {
     interesses: "",
     senha: "",
   });
+  
   const [bgColor, setBgColor] = useState("#47427C");
-
-  const [bgColor, setBgColor] = useState("#47427C"); //novo
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [hoverLogout, setHoverLogout] = useState(false);
@@ -73,7 +72,7 @@ export default function PerfilHeader() {
 
     if (!token) {
       const random = avatarColors[Math.floor(Math.random() * avatarColors.length)];
-      setBgColor(random); // gerar aleatório se nada mais
+      setBgColor(random); 
       return;
     }
 
@@ -103,7 +102,7 @@ export default function PerfilHeader() {
         setBgColor(random);
       }
     })();
-  }, []); // só na montagem
+  }, []); 
 
   const initials = formData.nome
     ? formData.nome.split(" ")[0].substring(0, 2).toUpperCase()
@@ -119,7 +118,7 @@ export default function PerfilHeader() {
         interesses: formData.interesses,
         interest: formData.interesses,
         password: formData.senha || undefined,
-        avatarColor: bgColor, //novo: persistir a cor no backend
+        avatarColor: bgColor, 
       };
 
       const response = await apiVestibulizeClient.put("/user/update", payload, {
