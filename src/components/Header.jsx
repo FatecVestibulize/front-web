@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Button from "./Button";
-import { Search, Plus } from "lucide-react";
+import { Search, ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const useScreenSize = (breakpoint = 768) => {
   const [width, setWidth] = useState(window.innerWidth);
@@ -21,12 +22,24 @@ const CARD_COLORS = {
   glow: "0 0 12px rgba(165, 156, 255, 0.35)",
 };
 
-const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlaceholder, addButtonLabel }) => {
+const Header = ({
+  title,
+  searchText,
+  onSearchChange,
+  onAddClick,
+  searchPlaceholder,
+  addButtonLabel,
+  customButton,
+  backButton = false,
+}) => {
   const isMobile = useScreenSize(768);
+  const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
   const buttonLabel = addButtonLabel || "Adicionar Anotação";
-  const inputPlaceholder = isMobile ? "Pesquisar..." : (searchPlaceholder || "Pesquisa | Busque pelo título...");
+  const inputPlaceholder = isMobile
+    ? "Pesquisar..."
+    : searchPlaceholder || "Pesquisa | Busque pelo título...";
 
   const inputContainerStyle = {
     flex: 1,
@@ -77,6 +90,31 @@ const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlacehold
         zIndex: 100,
       }}
     >
+      {backButton && (
+        <div
+          style={{
+            textAlign: "left",
+            marginLeft: "25px",
+            backgroundColor: "rgb(74, 76, 120)",
+            borderRadius: "50%",
+            width: "fit-content",
+            position: "absolute",
+            cursor: "pointer",
+          }}
+          onClick={() => navigate(-1)}
+        >
+          <ChevronLeft
+            style={{
+              fontSize: "20px",
+              color: "white",
+              width: "50px",
+              height: "50px",
+              padding: "5px",
+            }}
+          />
+        </div>
+      )}
+
       <h1
         style={{
           fontFamily: "'Inter', sans-serif",
@@ -141,7 +179,6 @@ const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlacehold
                 pointerEvents: "none",
               }}
             />
-
             <input
               type="text"
               placeholder={inputPlaceholder}
@@ -170,6 +207,8 @@ const Header = ({ title, searchText, onSearchChange, onAddClick, searchPlacehold
             <Button label={buttonLabel} onClick={onAddClick} style={componentButtonStyle} />
           )}
         </div>
+
+        {customButton && <div>{customButton}</div>}
       </div>
     </div>
   );

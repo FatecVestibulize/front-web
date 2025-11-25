@@ -30,8 +30,8 @@ function Login() {
     setFormData({ ...formData, [e.target.id]: e.target.value })
   }
 
-  const handleLogin = async ({ usuario, senha }) => {
-    if (!usuario || !senha) {
+  const handleLogin = async ({ email, senha }) => {
+    if (!email || !senha) {
       toast.current.show({
         severity: 'warn',
         summary: 'Campos obrigatórios',
@@ -42,7 +42,7 @@ function Login() {
     }
 
     const payload = {
-      username: usuario,
+      email: email,
       password: senha
     }
 
@@ -52,8 +52,10 @@ function Login() {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token)
         localStorage.setItem('userData', JSON.stringify({
-          username: usuario,
-          email: response.data.email || ''
+          username: response.data.username,
+          email: response.data.email || '',
+          avatar_url: response.data.avatar_url || '',
+          loginStreak: response.data.loginStreak || 0
         }))
 
         toast.current.show({
@@ -78,7 +80,7 @@ function Login() {
       toast.current.show({
         severity: 'error',
         summary: 'Falha no login',
-        detail: 'Usuário ou senha incorretos. Tente novamente.',
+        detail: 'Email ou senha incorretos. Tente novamente.',
         life: 3000
       })
     }
@@ -107,7 +109,7 @@ function Login() {
           alignItems: isMobile ? 'center' : 'flex-start',
         }}>
           <Formulario titulo="Login" subtitulo="Faça seu login para continuar">
-            <InputText label="Usuário" id="usuario" type="text" value={formData.usuario} onChange={handleChange} />
+            <InputText label="Email" id="email" type="email" value={formData.email} onChange={handleChange} />
             <InputText label="Senha" id="senha" type="password" value={formData.senha} onChange={handleChange} />
             <Button label="ACESSAR" onClick={handleSubmit} />
             <RedirecionamentoLinks links={[

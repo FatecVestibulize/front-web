@@ -8,10 +8,10 @@ export default function Menu() {
 
   const baseLinks = [
     // { to: "/", label: "Início" },
-    { to: "/caderno", label: "Caderno" },
+    { to: "/caderno", label: "Cadernos" },
     { to: "/metas", label: "Metas" },
     { to: "/datas", label: "Datas" },
-    // { to: "/quiz", label: "Quiz" },
+    { to: "/quiz", label: "Quiz" },
     // { to: "/forum", label: "Fórum" },
   ];
 

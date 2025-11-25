@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Edit2,
   Mail,
@@ -16,20 +16,25 @@ import {
   Palette,
 } from "lucide-react";
 import apiVestibulizeClient from "../utils/apiVestibulizeClient";
+import { Toast } from "primereact/toast";
 
 export default function PerfilHeader() {
+  const toast = useRef(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [avatar, setAvatar] = useState(null);
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
     interesses: "",
     senha: "",
+    avatar: "",
   });
   
   const [bgColor, setBgColor] = useState("#47427C");
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [hoverLogout, setHoverLogout] = useState(false);
+  const [loginStreak, setLoginStreak] = useState(0);
 
   const materias = [
     { nome: "Português", cor: "#F43F5E", icone: <BookOpen size={14} /> },
@@ -63,6 +68,7 @@ export default function PerfilHeader() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const localUserData = JSON.parse(localStorage.getItem("userData") || "{}");
+    
     setFormData((prev) => ({
       ...prev,
       nome: localUserData.username || "",
@@ -70,10 +76,24 @@ export default function PerfilHeader() {
       interesses: localUserData.interesses || "",
     }));
 
-    if (!token) {
-      const random = avatarColors[Math.floor(Math.random() * avatarColors.length)];
-      setBgColor(random); 
-      return;
+    setAvatar(localUserData.avatar_url || null);
+    setLoginStreak(localUserData.loginStreak || 0);
+
+    if (localUserData.username) {
+      const username = localUserData.username;
+      let savedColor = localStorage.getItem(`avatarColor_${username}`);
+      
+      if (savedColor) {
+        setBgColor(savedColor);
+      } else if (!token) {
+        const random = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+        setBgColor(random);
+        return; 
+      }
+    } else {
+        const random = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+        setBgColor(random);
+        if(!token) return;
     }
 
     (async () => {
@@ -91,15 +111,12 @@ export default function PerfilHeader() {
           interesses: user.interest || localUserData.interesses || "",
         }));
 
+        setLoginStreak(user.loginStreak || 0);
+
         if (user.avatarColor && user.avatarColor.trim() !== "") {
           setBgColor(user.avatarColor);
-        } else {
-          const random = avatarColors[Math.floor(Math.random() * avatarColors.length)];
-          setBgColor(random);
         }
       } catch (err) {
-        const random = avatarColors[Math.floor(Math.random() * avatarColors.length)];
-        setBgColor(random);
       }
     })();
   }, []); 
@@ -137,8 +154,14 @@ export default function PerfilHeader() {
           username: returned.username || formData.nome,
           email: returned.email || formData.email,
           interesses: formData.interesses,
+          avatar_url: avatar,
+          loginStreak: loginStreak
         })
       );
+
+      if(returned.username || formData.nome) {
+         localStorage.setItem(`avatarColor_${returned.username || formData.nome}`, bgColor);
+      }
 
       setFormData((prev) => ({
         ...prev,
@@ -151,13 +174,24 @@ export default function PerfilHeader() {
         setBgColor(returned.avatarColor);
       }
 
-      alert("Perfil atualizado com sucesso!");
+      toast.current.show({
+        severity: 'success',
+        summary: 'Perfil atualizado',
+        detail: 'Seus dados foram atualizados com sucesso.',
+        life: 2000
+      });
+      
       window.dispatchEvent(new Event("profileUpdated"));
       setIsEditing(false);
       setFormData((prev) => ({ ...prev, senha: "" }));
+
     } catch (error) {
-      console.error(error);
-      alert("Erro ao atualizar perfil. Tente novamente.");
+      toast.current.show({
+        severity: 'error',
+        summary: 'Erro ao atualizar',
+        detail: 'Não foi possível atualizar o perfil. Tente novamente.',
+        life: 3000
+      });
     }
   };
 
@@ -174,12 +208,26 @@ export default function PerfilHeader() {
         });
       }
     } catch (err) {
-      console.error("Erro ao deslogar:", err);
+       console.error(err);
     } finally {
+      if (formData.nome) {
+        localStorage.setItem(`avatarColor_${formData.nome}`, bgColor);
+        localStorage.setItem(`interesses_${formData.nome}`, formData.interesses);
+      }
+
       localStorage.removeItem("token");
       localStorage.removeItem("userData");
-      window.location.href = "/";
-      window.location.reload();
+      
+      toast.current.show({
+        severity: 'success',
+        summary: 'Deslogado',
+        detail: 'Você foi desconectado com sucesso.',
+        life: 1500
+      });
+
+      setTimeout(() => {
+          window.location.href = "/";
+      }, 1000);
     }
   };
 
@@ -228,8 +276,63 @@ export default function PerfilHeader() {
     alignItems: "center",
   };
 
+  const changeAvatar = async (e) => {
+    {
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const token = localStorage.getItem("token");
+        const formDataUpload = new FormData();
+        formDataUpload.append("avatar", file);
+        
+        try {
+          const response = await apiVestibulizeClient.post(
+            "/user/avatar",
+            formDataUpload,
+            {
+              headers: {
+                token: token,
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+          
+          if (response.data && response.data.avatar_url) {
+            const newAvatarUrl = response.data.avatar_url;
+            
+            setAvatar(newAvatarUrl);
+            
+            const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+            userData.avatar_url = newAvatarUrl;
+            localStorage.setItem("userData", JSON.stringify(userData));
+            
+            window.dispatchEvent(
+              new CustomEvent("avatarUpdated", { 
+                detail: { avatar_url: newAvatarUrl } 
+              })
+            );
+            
+            toast.current.show({
+              severity: 'success',
+              summary: 'Avatar atualizado',
+              detail: 'Seu avatar foi alterado com sucesso.',
+              life: 2000
+            });
+          }
+        } catch (err) {
+          toast.current.show({
+            severity: 'error',
+            summary: 'Erro ao enviar avatar',
+            detail: 'Erro ao enviar imagem. Tente novamente.',
+            life: 3000
+          });
+        }
+      }
+    }
+  }
+
   return (
     <div style={containerStyle}>
+      <Toast ref={toast} position="bottom-right" />
       <div style={flexStyle}>
         <div
           style={{
@@ -246,9 +349,63 @@ export default function PerfilHeader() {
             justifyContent: "center",
             flexShrink: 0,
             marginBottom: isMobile ? "12px" : "0",
+            position: "relative",
+            overflow: "visible",
           }}
         >
-          {initials}
+          {avatar ? (
+            <img
+              src={avatar}
+              alt="Avatar"
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            initials
+          )}
+          
+          {/* Edit Icon Badge */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "2px",
+              right: "2px",
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%",
+              backgroundColor: "#F58220",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+              border: "2px solid white",
+              pointerEvents: "none",
+              zIndex: 2,
+            }}
+          >
+            <Edit2 size={12} color="white" />
+          </div>
+
+          <input
+            type="file"
+            accept="image/*"
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: "100%",
+              height: "100%",
+              opacity: 0,
+              cursor: "pointer",
+              zIndex: 3,
+            }}
+            title="Alterar avatar"
+            onChange={changeAvatar}
+          />
         </div>
 
         <div style={{ flex: 1, textAlign: isMobile ? "center" : "left" }}>
@@ -335,7 +492,7 @@ export default function PerfilHeader() {
               }}
             >
               <Flame size={14} />
-              Sequência: 7 dias
+              Sequência: {loginStreak || 0} dias
             </div>
             <div
               style={{

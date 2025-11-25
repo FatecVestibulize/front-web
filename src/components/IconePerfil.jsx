@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import apiVestibulizeClient from "../utils/apiVestibulizeClient";
+import { Toast } from "primereact/toast";
 
 export default function IconePerfil() {
   const [showLogout, setShowLogout] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [bgColor, setBgColor] = useState("#47427C");
+  const toast = useRef(null);
   const navigate = useNavigate();
 
   const loggedIn = !!localStorage.getItem("token");
-  const bgColor = userData?.avatarColor;
 
   const initials = userData?.username
     ? userData.username.split(" ")[0].substring(0, 2).toUpperCase()
@@ -25,6 +28,8 @@ export default function IconePerfil() {
       });
 
       setUserData(res.data);
+      setAvatarUrl(res.data.avatar_url || null);
+      setBgColor(res.data.avatarColor || "#47427C");
     } catch (err) {
       console.error("Erro ao carregar usuário no ícone:", err);
     }
@@ -32,10 +37,20 @@ export default function IconePerfil() {
 
   useEffect(() => {
     loadUserFromBackend();
-    const handleRefresh = () => loadUserFromBackend();
-    window.addEventListener("profileUpdated", handleRefresh);
 
-    return () => window.removeEventListener("profileUpdated", handleRefresh);
+    const handleRefresh = () => loadUserFromBackend();
+    const handleColorChange = (e) => setBgColor(e.detail.newColor);
+    const handleAvatarUpdate = (e) => setAvatarUrl(e.detail.avatar_url);
+
+    window.addEventListener("profileUpdated", handleRefresh);
+    window.addEventListener("avatarColorChanged", handleColorChange);
+    window.addEventListener("avatarUpdated", handleAvatarUpdate);
+
+    return () => {
+      window.removeEventListener("profileUpdated", handleRefresh);
+      window.removeEventListener("avatarColorChanged", handleColorChange);
+      window.removeEventListener("avatarUpdated", handleAvatarUpdate);
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -48,18 +63,33 @@ export default function IconePerfil() {
         });
       }
     } catch (err) {
-      console.error("Erro ao deslogar:", err);
+      toast.current.show({
+        severity: "error",
+        summary: "Erro ao deslogar",
+        detail: "Erro ao deslogar. Tente novamente.",
+        life: 3000,
+      });
     }
 
     localStorage.removeItem("token");
-    window.location.href = "/";
+    localStorage.removeItem("userData");
+
+    toast.current.show({
+      severity: "success",
+      summary: "Deslogado com sucesso",
+      detail: "Você foi desconectado com sucesso.",
+      life: 2000,
+    });
+
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 100);
   };
 
   const handleClick = () => {
     if (loggedIn) navigate("/perfil");
   };
 
-  // 🔧 CONTROLE LIMPO DE HOVER (SEM LOOP INFINITO)
   const handleMouseEnter = () => setShowLogout(true);
   const handleMouseLeave = () => setShowLogout(false);
 
@@ -111,11 +141,31 @@ export default function IconePerfil() {
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
-      {initials}
+      <Toast ref={toast} position="bottom-right" />
 
-      <div style={logoutBoxStyle} onClick={handleLogout}>
-        <LogOut size={16} /> Sair
-      </div>
+      {!loggedIn || (!avatarUrl && !initials) ? (
+        <div style={{ fontSize: "12px" }}>?</div>
+      ) : avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt="Avatar"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
+      ) : (
+        <div>{initials}</div>
+      )}
+
+      {loggedIn && (
+        <div style={logoutBoxStyle} onClick={handleLogout}>
+          <LogOut size={16} color="#F58220" />
+          <span>Sair</span>
+        </div>
+      )}
     </div>
   );
 }
