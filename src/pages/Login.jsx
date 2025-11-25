@@ -53,7 +53,8 @@ function Login() {
         localStorage.setItem('token', response.data.token)
         localStorage.setItem('userData', JSON.stringify({
           username: response.data.username,
-          email: response.data.email || ''
+          email: response.data.email || '',
+          avatar_url: response.data.avatar_url || ''
         }))
 
         toast.current.show({

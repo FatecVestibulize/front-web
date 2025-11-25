@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Edit2,
   Mail,
@@ -16,14 +16,18 @@ import {
   Palette,
 } from "lucide-react";
 import apiVestibulizeClient from "../utils/apiVestibulizeClient";
+import { Toast } from "primereact/toast";
 
 export default function PerfilHeader() {
+  const toast = useRef(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [avatar, setAvatar] = useState(null);
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
     interesses: "",
     senha: "",
+    avatar: "",
   });
   const [bgColor, setBgColor] = useState("#47427C");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -70,7 +74,10 @@ export default function PerfilHeader() {
       email: userData.email || "",
       interesses: interessesSalvos,
       senha: "",
+      avatar: userData.avatar_url || null,
     });
+
+    setAvatar(userData.avatar_url);
 
     if (userData.username) {
       const username = userData.username;
@@ -115,12 +122,21 @@ export default function PerfilHeader() {
         formData.interesses
       );
 
-      alert("Perfil atualizado com sucesso!");
+      toast.current.show({
+        severity: 'success',
+        summary: 'Perfil atualizado com sucesso',
+        detail: 'Seus dados foram atualizados com sucesso.',
+        life: 2000
+      });
       setIsEditing(false);
       setFormData({ ...formData, senha: "" });
     } catch (error) {
-      console.error(error);
-      alert("Erro ao atualizar perfil. Tente novamente.");
+      toast.current.show({
+        severity: 'error',
+        summary: 'Erro ao atualizar perfil',
+        detail: 'Erro ao atualizar perfil. Tente novamente.',
+        life: 3000
+      });
     }
   };
 
@@ -146,7 +162,12 @@ export default function PerfilHeader() {
         });
       }
     } catch (err) {
-      console.error("Erro ao deslogar:", err);
+      toast.current.show({
+        severity: 'error',
+        summary: 'Erro ao deslogar',
+        detail: 'Erro ao deslogar. Tente novamente.',
+        life: 3000
+      });
     } finally {
       localStorage.removeItem("token");
       localStorage.removeItem("userData");
@@ -154,6 +175,12 @@ export default function PerfilHeader() {
         localStorage.setItem(`avatarColor_${formData.nome}`, savedColor);
       if (savedInteresses)
         localStorage.setItem(`interesses_${formData.nome}`, savedInteresses);
+      toast.current.show({
+        severity: 'success',
+        summary: 'Deslogado com sucesso',
+        detail: 'Você foi desconectado com sucesso.',
+        life: 2000
+      });
       window.location.href = "/";
       window.location.reload();
     }
@@ -204,8 +231,63 @@ export default function PerfilHeader() {
     alignItems: "center",
   };
 
+  const changeAvatar = async (e) => {
+    {
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const token = localStorage.getItem("token");
+        const formDataUpload = new FormData();
+        formDataUpload.append("avatar", file);
+        
+        try {
+          const response = await apiVestibulizeClient.post(
+            "/user/avatar",
+            formDataUpload,
+            {
+              headers: {
+                token: token,
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+          
+          if (response.data && response.data.avatar_url) {
+            const newAvatarUrl = response.data.avatar_url;
+            
+            setAvatar(newAvatarUrl);
+            
+            const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+            userData.avatar_url = newAvatarUrl;
+            localStorage.setItem("userData", JSON.stringify(userData));
+            
+            window.dispatchEvent(
+              new CustomEvent("avatarUpdated", { 
+                detail: { avatar_url: newAvatarUrl } 
+              })
+            );
+            
+            toast.current.show({
+              severity: 'success',
+              summary: 'Avatar atualizado com sucesso',
+              detail: 'Seu avatar foi atualizado com sucesso.',
+              life: 2000
+            });
+          }
+        } catch (err) {
+          toast.current.show({
+            severity: 'error',
+            summary: 'Erro ao enviar avatar',
+            detail: 'Erro ao enviar avatar. Tente novamente.',
+            life: 3000
+          });
+        }
+      }
+    }
+  }
+
   return (
     <div style={containerStyle}>
+      <Toast ref={toast} position="bottom-right" />
       <div style={flexStyle}>
         <div
           style={{
@@ -222,9 +304,63 @@ export default function PerfilHeader() {
             justifyContent: "center",
             flexShrink: 0,
             marginBottom: isMobile ? "12px" : "0",
+            position: "relative",
+            overflow: "visible",
           }}
         >
-          {initials}
+          {avatar ? (
+            <img
+              src={avatar}
+              alt="Avatar"
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            initials
+          )}
+          
+          {/* Edit Icon Badge */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "2px",
+              right: "2px",
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%",
+              backgroundColor: "#F58220",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+              border: "2px solid white",
+              pointerEvents: "none",
+              zIndex: 2,
+            }}
+          >
+            <Edit2 size={12} color="white" />
+          </div>
+
+          <input
+            type="file"
+            accept="image/*"
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: "100%",
+              height: "100%",
+              opacity: 0,
+              cursor: "pointer",
+              zIndex: 3,
+            }}
+            title="Alterar avatar"
+            onChange={changeAvatar}
+          />
         </div>
 
         <div style={{ flex: 1, textAlign: isMobile ? "center" : "left" }}>

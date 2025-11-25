@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ImagemPerfilPadrao from "../assets/imagem-perfil.png";
 import apiVestibulizeClient from "../utils/apiVestibulizeClient";
+import { Toast } from "primereact/toast";
 
 export default function IconePerfil() {
   const [isHovered, setIsHovered] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [bgColor, setBgColor] = useState("#47427C");
-
+  const [avatar, setAvatar] = useState(null);
+  const toast = useRef(null);
   const navigate = useNavigate();
   const userData = JSON.parse(localStorage.getItem("userData") || "{}");
   const loggedIn = !!userData?.username;
@@ -35,10 +37,18 @@ export default function IconePerfil() {
 
       setBgColor(savedColor);
 
+      setAvatar(userData.avatar_url || null);
+
       const handleColorChange = (e) => setBgColor(e.detail.newColor);
+      const handleAvatarUpdate = (e) => setAvatar(e.detail.avatar_url);
+
       window.addEventListener("avatarColorChanged", handleColorChange);
-      return () =>
+      window.addEventListener("avatarUpdated", handleAvatarUpdate);
+
+      return () => {
         window.removeEventListener("avatarColorChanged", handleColorChange);
+        window.removeEventListener("avatarUpdated", handleAvatarUpdate);
+      };
     }
   }, [loggedIn, userData.username]);
 
@@ -64,10 +74,21 @@ export default function IconePerfil() {
         });
       }
     } catch (err) {
-      console.error("Erro ao deslogar:", err);
+      toast.current.show({
+        severity: 'error',
+        summary: 'Erro ao deslogar',
+        detail: 'Erro ao deslogar. Tente novamente.',
+        life: 3000
+      });
     }
     localStorage.removeItem("token");
     localStorage.removeItem("userData");
+    toast.current.show({
+      severity: 'success',
+      summary: 'Deslogado com sucesso',
+      detail: 'Você foi desconectado com sucesso.',
+      life: 2000
+    });
     window.location.href = "/";
   };
 
@@ -144,12 +165,26 @@ export default function IconePerfil() {
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
+      <Toast ref={toast} position="bottom-right" />
       <div style={outerBorderStyle} />
 
       {!loggedIn ? (
         <img
           src={ImagemPerfilPadrao}
           alt="Perfil Padrão"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: "50%",
+            objectFit: "cover",
+            position: "relative",
+            zIndex: 1,
+          }}
+        />
+      ) : avatar ? (
+        <img
+          src={avatar}
+          alt="Avatar"
           style={{
             width: "100%",
             height: "100%",
