@@ -207,6 +207,7 @@ const Anotacao = () => {
             );
 
             const textoResumo = resumoGerado?.data || "";
+            console.log(resumoGerado);
 
             setSumario(textoResumo);
 
