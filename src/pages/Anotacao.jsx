@@ -222,10 +222,8 @@ const Anotacao = () => {
             );
 
             const textoResumo = resumoGerado?.data || "";
-            console.log(resumoGerado);
 
             setSumario(textoResumo);
-
             setResumoPagina(textoResumo);
 
             toast.current?.show({
@@ -301,73 +299,11 @@ const Anotacao = () => {
         setFiltro(e.target.value);
     };
 
-
     return (
         <main style={{ paddingTop: '55px', background: 'linear-gradient(180deg, #F9F9F9 0%, #E6E9F0 100%)', minHeight: '100vh', width: '100%' }}>
             <Navbar />
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          overflow: "hidden",
-          pointerEvents: "none",
-          backgroundColor: "#E8E8E8",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: "-120px",
-            right: "-100px",
-            width: "400px",
-            height: "350px",
-            backgroundColor: "#D6D1EB",
-            borderRadius: "50%",
-            opacity: "0.6",
-          }}
-        ></div>
-
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-140px",
-            left: "-120px",
-            width: "300px",
-            height: "300px",
-            backgroundColor: "#D6D1EB",
-            borderRadius: "50%",
-            opacity: "0.5",
-          }}
-        ></div>
-
-        <div
-          style={{
-            position: "absolute",
-            top: "40%",
-            left: "10%",
-            width: "120px",
-            height: "120px",
-            backgroundColor: "#CBC5E3",
-            borderRadius: "50%",
-            opacity: "0.4",
-          }}
-        ></div>
-
-        <div
-          style={{
-            position: "absolute",
-            top: "60%",
-            right: "15%",
-            width: "120px",
-            height: "120px",
-            backgroundColor: "#DCD7F0",
-            borderRadius: "50%",
-            opacity: "0.3",
-            transform: "rotate(-25deg)",
-          }}
-        ></div>
-      </div>
+            
+        
 
             <Toast ref={toast} position="bottom-right" />
             <ConfirmDialog />
@@ -384,64 +320,63 @@ const Anotacao = () => {
             />
 
             {resumoPagina && (
-            <section
-                style={{
-                    maxWidth: "1000px",
-                    margin: "25px auto",
-                    padding: "0 20px"
-                }}
-            >
-            <div
-                style={{
-                    width: "100%",
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    boxShadow: "0px 4px 14px rgba(0,0,0,0.15)",
-                    fontFamily: "inherit",
-                    background: "white"
-                }}
-        >
-            <div
-                style={{
-                    background: "#6A4CFF",
-                    color: "white",
-                    padding: "18px 22px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    fontSize: "1.2rem",
-                    fontWeight: "600",
-                    fontFamily: "inherit"
-                }}
-            >
-                <span style={{ fontSize: "1.4rem"}}> <i className="pi pi-sparkles"/></span>
-                <span>Resumo Gerado pela IA</span>
-            </div>
-
-            <div style={{ padding: "18px 22px", background: "white" }}>
-                <textarea
-                    readOnly
-                    value={resumoPagina}
+                <section
                     style={{
-                        width: "100%",
-                        minHeight: "140px",
-                        resize: "vertical",
-                        borderRadius: "10px",
-                        border: "1px solid #E0E0E0",
-                        padding: "14px 16px",
-                        outline: "none",
-                        background: "#FAFAFA",
-                        color: "#333",
-                        fontFamily: "inherit",
-                        fontSize: "0.95rem",
-                        lineHeight: "1.48",
+                        maxWidth: "1000px",
+                        margin: "25px auto",
+                        padding: "0 20px"
                     }}
-                />
-            </div>
-        </div>
-    </section>
-)}
+                >
+                    <div
+                        style={{
+                            width: "100%",
+                            borderRadius: "16px",
+                            overflow: "hidden",
+                            boxShadow: "0px 4px 14px rgba(0,0,0,0.15)",
+                            fontFamily: "inherit",
+                            background: "white"
+                        }}
+                    >
+                        <div
+                            style={{
+                                background: "#6A4CFF",
+                                color: "white",
+                                padding: "18px 22px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                fontSize: "1.2rem",
+                                fontWeight: "600",
+                                fontFamily: "inherit"
+                            }}
+                        >
+                            <span style={{ fontSize: "1.4rem"}}> <i className="pi pi-sparkles"/></span>
+                            <span>Resumo Gerado pela IA</span>
+                        </div>
 
+                        <div style={{ padding: "18px 22px", background: "white" }}>
+                            <textarea
+                                readOnly
+                                value={resumoPagina}
+                                style={{
+                                    width: "100%",
+                                    minHeight: "140px",
+                                    resize: "vertical",
+                                    borderRadius: "10px",
+                                    border: "1px solid #E0E0E0",
+                                    padding: "14px 16px",
+                                    outline: "none",
+                                    background: "#FAFAFA",
+                                    color: "#333",
+                                    fontFamily: "inherit",
+                                    fontSize: "0.95rem",
+                                    lineHeight: "1.48",
+                                }}
+                            />
+                        </div>
+                    </div>
+                </section>
+            )}
 
             <section style={{ padding: "0 20px", maxWidth: "1000px", margin: "30px auto" }}>
                 <Listagem
@@ -454,6 +389,9 @@ const Anotacao = () => {
 
             <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingAnotacao ? "Atualizar - Anotação" : "Adicionar - Anotação"}>
                 {modalFormJSX}
+            </Modal>
+
+            <Modal isOpen={isViewModalOpen} onClose={handleCloseViewModal} title={viewingAnotacao ? `Visualizar - ${viewingAnotacao.titulo}` : "Visualizar Anotação"}>
             </Modal>
         </main>
     );
