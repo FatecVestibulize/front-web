@@ -152,15 +152,23 @@ export default function ListaAmigos() {
   };
 
   useEffect(() => {
-  const handleResize = () => setWindowWidth(window.innerWidth);
-  window.addEventListener("resize", handleResize);
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
 
-  fetchAll(); 
+    const handleAvatarUpdate = (event) => {
+  
+      fetchAll(); 
+    };
 
-  return () => {
-    window.removeEventListener("resize", handleResize);
-  };
-}, []);
+    window.addEventListener("avatarUpdated", handleAvatarUpdate);
+
+    fetchAll();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("avatarUpdated", handleAvatarUpdate);
+    };
+  }, []);
 
   const usersToShow =
     searchQuery.trim() === ""
@@ -225,27 +233,41 @@ export default function ListaAmigos() {
             const hasReceived = pendingReceived.includes(user.id);
             const isOnline = onlineIds.has(user.id);
             const initials = generateInitials(user.username);
-            const color = getAvatarColor(user); 
+            const color = getAvatarColor(user);
+            const avatarUrl = user.avatar_url;
 
             return (
               <div key={user.id} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div style={{ position: "relative" }}>
-                  <div
-                    style={{
-                      width: "44px",
-                      height: "44px",
-                      borderRadius: "50%",
-                      backgroundColor: color,
-                      color: "white",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "13px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {initials}
-                  </div>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={`Avatar de ${user.username}`}
+                      style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "50%",
+                        backgroundColor: color,
+                        color: "white",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "13px",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {initials}
+                    </div>
+                  )}
                   {isOnline && (
                     <div
                       style={{
