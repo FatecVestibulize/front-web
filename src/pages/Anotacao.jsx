@@ -292,6 +292,7 @@ const Anotacao = () => {
         <>
             <Button icon="pi pi-pencil" className="p-button-text p-button-sm" style={{ color: '#ffbc3fff' }} onClick={(e) => { e.stopPropagation(); handleOpenModal(anotacao); }} />
             <Button icon="pi pi-trash" className="p-button-text p-button-sm" style={{ color: '#e05a2eff' }} onClick={(e) => { e.stopPropagation(); confirmDelete(anotacao.id); }} />
+            <Button icon="pi pi-file" className="p-button-text p-button-sm" style={{ color: '#e05a2eff' }} onClick={(e) => { navigate(`/caderno/${notebook_id}/anotacoes/${anotacao.id}/materiais-apoio`); }} />
         </>
     );
 

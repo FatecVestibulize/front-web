@@ -12,6 +12,7 @@ import AlterarSenha from "./pages/AlterarSenha";
 import QuizStart from "./pages/QuizStart";
 import Quiz from "./pages/Quiz";
 import QuizFinish from "./pages/QuizFinish";
+import MaterialApoio from "./pages/MaterialApoio";
 
 function App() {
   return (
@@ -40,6 +41,11 @@ function App() {
             <ProtectedRoute>
               <Anotacao />
             </ProtectedRoute>} />
+            <Route path="/caderno/:notebook_id/anotacoes/:note_id/materiais-apoio" element={
+            <ProtectedRoute>
+              <MaterialApoio />
+            </ProtectedRoute>} />
+
           <Route path="/datas" element={
             <ProtectedRoute>
               <Prova />

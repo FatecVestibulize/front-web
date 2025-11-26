@@ -29,9 +29,9 @@ const Card = ({ titulo, data, actions, onClick }) => {
 
   const contentContainerStyle = {
     display: "flex",
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "flex-start",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
     gap: "12px",
   };
 
