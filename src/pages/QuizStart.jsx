@@ -75,6 +75,16 @@ const QuizStart = () => {
       return false;
     }
 
+    if (selectedCategories.length === 0) {
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'Selecione as matérias',
+        detail: 'Selecione as matérias para criar o quiz.',
+        life: 3000
+      })
+      return false;
+    }
+
     const body = {
       type: selectedMode,
       categories_ids: selectedCategories,
