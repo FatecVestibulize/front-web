@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Banner from '../components/Banner'
 import Formulario from '../components/Formulario'
 import InputText from '../components/InputText'
@@ -8,7 +9,7 @@ import apiVestibulizeClient from '../utils/apiVestibulizeClient'
 import { Toast } from 'primereact/toast'
 
 function Cadastro() {
-
+  const navigate = useNavigate()
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const isMobile = windowWidth <= 768;
   const [formData, setFormData] = useState({
@@ -83,6 +84,10 @@ function Cadastro() {
         detail: 'Seu cadastro foi concluído com sucesso.',
         life: 2500
       })
+
+      setTimeout(() => {
+        navigate('/')
+      }, 2600);
 
       console.log(response.data)
     } catch (error) {
