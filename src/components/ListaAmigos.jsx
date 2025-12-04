@@ -247,6 +247,13 @@ export default function ListaAmigos() {
                         width: "44px",
                         height: "44px",
                         borderRadius: "50%",
+                        backgroundColor: color,
+                        color: "white",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "13px",
+                        fontWeight: 500,
                         objectFit: "cover",
                       }}
                     />
