@@ -64,7 +64,7 @@ const QuizFinish = () => {
     let correctCount = 0;
     const subjectStats = {};
 
-    const totalTime = quizData.quiz.finished_at ? Math.floor((new Date(quizData.quiz.created_at) - new Date(quizData.quiz.finished_at)) / 1000) : 0;
+    const totalTime = quizData.quiz.finished_at ? Math.floor((new Date(quizData.quiz.finished_at) - new Date(quizData.quiz.created_at)) / 1000) : 0;
 
     answers.forEach((item) => {
 

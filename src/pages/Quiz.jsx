@@ -66,7 +66,7 @@ const Quiz = () => {
       
       if (remainingTime === 0) {
 
-        saveQuizFinishedAt();
+        
 
         toast.current?.show({
           severity: 'warn',
@@ -75,7 +75,7 @@ const Quiz = () => {
           life: 5000
         });
 
-        navigate(`/quiz/${quiz_id}/resumo`);
+        saveQuizFinishedAt();
 
       }
     }, 1000);
@@ -94,7 +94,7 @@ const Quiz = () => {
             token: `${localStorage.getItem('token')}`
           }
       }).then((response) => {
-        
+        navigate(`/quiz/${quiz_id}/resumo`);
       }).catch((error) => {
         console.error("Erro ao finalizar quiz:", error);
         toast.current?.show({
@@ -171,7 +171,6 @@ const Quiz = () => {
         if(reviewData.length + 1 === totalQuestions) {
 
           saveQuizFinishedAt();
-          navigate(`/quiz/${quiz_id}/resumo`);
 
         }
 
@@ -233,7 +232,6 @@ const Quiz = () => {
   const handleFinishQuiz = () => {
     if (window.confirm("Tem certeza que deseja finalizar o quiz?")) {
       saveQuizFinishedAt();
-      navigate(`/quiz/${quiz_id}/resumo`);
     }
   };
 
@@ -247,7 +245,6 @@ const Quiz = () => {
   const handleExit = () => {
     if (window.confirm("Tem certeza que deseja sair? Seu progresso será salvo.")) {
       saveQuizFinishedAt();
-      navigate('/quiz');
     }
   };
 
