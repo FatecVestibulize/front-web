@@ -90,8 +90,19 @@ export default function IconePerfil() {
     if (loggedIn) navigate("/perfil");
   };
 
-  const handleMouseEnter = () => setShowLogout(true);
-  const handleMouseLeave = () => setShowLogout(false);
+  const wrapperRef = useRef(null);
+  let hideTimeout = useRef(null);
+
+  const handleMouseEnter = () => {
+    clearTimeout(hideTimeout.current);
+    setShowLogout(true);
+  };
+
+  const handleMouseLeave = () => {
+    hideTimeout.current = setTimeout(() => {
+      setShowLogout(false);
+    }, 200); 
+  };
 
   const container = {
     width: 40,
@@ -136,29 +147,31 @@ export default function IconePerfil() {
 
   return (
     <div
-      style={container}
+      ref={wrapperRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
+      style={{ position: "relative", display: "inline-block" }}
     >
-      <Toast ref={toast} position="bottom-right" />
+      <div style={container} onClick={handleClick}>
+        <Toast ref={toast} position="bottom-right" />
 
-      {!loggedIn || (!avatarUrl && !initials) ? (
-        <div style={{ fontSize: "12px" }}>?</div>
-      ) : avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt="Avatar"
-          style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: "50%",
-            objectFit: "cover",
-          }}
-        />
-      ) : (
-        <div>{initials}</div>
-      )}
+        {!loggedIn || (!avatarUrl && !initials) ? (
+          <div style={{ fontSize: "12px" }}>?</div>
+        ) : avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt="Avatar"
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <div>{initials}</div>
+        )}
+      </div>
 
       {loggedIn && (
         <div style={logoutBoxStyle} onClick={handleLogout}>
