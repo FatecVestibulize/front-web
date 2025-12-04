@@ -18,6 +18,7 @@ export default function ListaAmigos() {
   const [searchQuery, setSearchQuery] = useState("");
   const [allUsers, setAllUsers] = useState([]);
   const [friendIds, setFriendIds] = useState(new Set());
+  const [quizScore, setQuizScore] = useState(0);
   const [pendingSent, setPendingSent] = useState(new Set());
   const [pendingReceived, setPendingReceived] = useState([]);
   const [onlineIds, setOnlineIds] = useState(new Set());
@@ -235,6 +236,18 @@ export default function ListaAmigos() {
             const initials = generateInitials(user.username);
             const color = getAvatarColor(user);
             const avatarUrl = user.avatar_url;
+            
+            if(isFriend) {
+              apiVestibulizeClient.get(`/user/${user.id}/quiz-score`, {
+                headers: { token: token },
+              }).then(res => {
+                setQuizScore(res.data.quiz_score);
+              }).catch(err => {
+                console.log("Erro getUserById:", err);
+              });
+            }
+
+            const scorePercentage = quizScore;
 
             return (
               <div key={user.id} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -309,7 +322,7 @@ export default function ListaAmigos() {
                         >
                           <div
                             style={{
-                              width: `78%`,
+                              width: scorePercentage + "%",
                               height: "100%",
                               backgroundColor: "#47427C",
                               borderRadius: "6px",
@@ -324,7 +337,7 @@ export default function ListaAmigos() {
                             textAlign: "right",
                           }}
                         >
-                          78%
+                          {scorePercentage}%
                         </span>
                       </>
                     ) : (
