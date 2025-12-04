@@ -31,7 +31,7 @@ export default function PerfilHeader() {
   });
   
   const [bgColor, setBgColor] = useState("#47427C");
-
+  const [progressoQuiz, setProgressoQuiz] = useState(0);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [hoverLogout, setHoverLogout] = useState(false);
   const [loginStreak, setLoginStreak] = useState(0);
@@ -95,7 +95,18 @@ export default function PerfilHeader() {
         setBgColor(random);
         if(!token) return;
     }
+    (async () => {
+      try {
+        const res = await apiVestibulizeClient.get(`/user/${localUserData.id}/quiz-score`, {
+          headers: { token: token },
+        });
+        setProgressoQuiz(res.data.quiz_score || 0);
+      } catch (error) {
+        console.error("Erro ao buscar score:", error);
+      }
+    })();
 
+  
     (async () => {
       try {
         const res = await apiVestibulizeClient.get("/user/me", {
@@ -504,7 +515,7 @@ export default function PerfilHeader() {
                 textAlign: isMobile ? "center" : "left",
               }}
             >
-              📊 Progresso: 78%
+              📊 Progresso: {progressoQuiz}%
             </div>
           </div>
         </div>
